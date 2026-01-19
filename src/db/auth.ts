@@ -1,21 +1,20 @@
+// src/db/auth.ts
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/core/config";
-import { authSession, authAccount, authVerification, authUser } from "@/db";
+import { user, session, account, verification } from "@/db/models/auth-schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
-      user: authUser,
-      session: authSession,
-      account: authAccount,
-      verification: authVerification,
+      user: user,
+      session: session,
+      account: account,
+      verification: verification,
     },
   }),
   emailAndPassword: {
     enabled: true,
   },
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:4321",
-  secret: process.env.BETTER_AUTH_SECRET || "change-me-in-production",
 });

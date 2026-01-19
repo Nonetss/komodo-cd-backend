@@ -1,8 +1,3 @@
-import {
-  authUser,
-  authSession,
-  authAccount,
-  authVerification,
-} from "@/db/models/users.table";
+import { user, session, account, verification } from "@/db/models/auth-schema";
 
-export { authUser, authSession, authAccount, authVerification };
+export { user, session, account, verification };

@@ -1,3 +1,8 @@
-import { usersTable } from "@/db/models/users.table";
+import {
+  authUser,
+  authSession,
+  authAccount,
+  authVerification,
+} from "@/db/models/users.table";
 
-export { usersTable };
+export { authUser, authSession, authAccount, authVerification };

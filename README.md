@@ -182,59 +182,6 @@ docker compose up -d
 docker compose logs -f
 ```
 
-### Producción
-
-El `Dockerfile` incluido utiliza multi-stage builds optimizados para Bun:
-
-```bash
-# Construir imagen
-docker build -t backend .
-
-# Ejecutar contenedor
-docker run -p 3000:3000 --env-file .env backend
-```
-
-### Docker Compose Completo (Producción)
-
-Para un despliegue completo con el frontend, crea un `compose.yml` en el directorio raíz:
-
-```yaml
-services:
-  backend:
-    build: ./backend
-    ports:
-      - "3000:3000"
-    env_file:
-      - ./backend/.env
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "4321:4321"
-    environment:
-      - API_URL=http://backend:3000
-
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  postgres_data:
-```
-
 ## Estructura del Proyecto
 
 ```

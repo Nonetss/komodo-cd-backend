@@ -1,3 +1,9 @@
-import { user, session, account, verification } from "@/db/models/auth-schema";
+import {
+  user,
+  session,
+  account,
+  verification,
+  ssoProvider,
+} from "@/db/models/auth-schema";
 
-export { user, session, account, verification };
+export { user, session, account, verification, ssoProvider };

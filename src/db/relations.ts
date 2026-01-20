@@ -8,16 +8,14 @@ export const relations = defineRelations(schema, (r) => ({
   },
 
   session: {
-    user: r.one.user({
-      from: r.session.userId,
-      to: r.user.id,
-    }),
+    user: r.one.user({ from: r.session.userId, to: r.user.id }),
   },
 
   account: {
-    user: r.one.user({
-      from: r.account.userId,
-      to: r.user.id,
-    }),
+    user: r.one.user({ from: r.account.userId, to: r.user.id }),
+  },
+
+  ssoProvider: {
+    user: r.one.user({ from: r.ssoProvider.userId, to: r.user.id }),
   },
 }));

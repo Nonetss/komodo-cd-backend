@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import { Handler } from "hono";
 import { auth } from "@/db/auth";
 import { logger } from "hono/logger";
+import { bootstrap } from "@/lib/bootstrap";
 
 const app = new OpenAPIHono();
 
@@ -54,4 +55,8 @@ app.doc("/doc", {
 
 app.get("/scalar", Scalar({ url: "/doc" }));
 
-Bun.serve({ port: 3000, fetch: app.fetch });
+// Ejecutar bootstrap al iniciar
+bootstrap().then(() => {
+  Bun.serve({ port: 3000, fetch: app.fetch });
+  console.log("🌐 Servidor corriendo en http://localhost:3000");
+});

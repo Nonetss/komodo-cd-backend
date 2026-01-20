@@ -54,7 +54,4 @@ app.doc("/doc", {
 
 app.get("/scalar", Scalar({ url: "/doc" }));
 
-Bun.serve({
-  port: 3000,
-  fetch: app.fetch,
-});
+Bun.serve({ port: 3000, fetch: app.fetch });

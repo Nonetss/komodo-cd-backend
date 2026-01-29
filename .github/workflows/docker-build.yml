@@ -9,6 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       packages: write
 
     steps:
@@ -19,7 +20,7 @@ jobs:
 
       - name: Build and Push
         run: |
-          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/none-snmp-backend
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/${{ github.repository }}
           IMAGE_ID=$(echo $IMAGE_ID | tr '[:upper:]' '[:lower:]')
 
           BRANCH=${{ github.ref_name }}

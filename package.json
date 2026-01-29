@@ -8,7 +8,8 @@
     "put": "bun run scripts/generate-endpoint.ts put",
     "patch": "bun run scripts/generate-endpoint.ts patch",
     "delete": "bun run scripts/generate-endpoint.ts delete",
-    "crud": "bun run scripts/generate-crud.ts"
+    "crud": "bun run scripts/generate-crud.ts",
+    "gen:table": "bun run scripts/generate-table.ts"
   },
   "dependencies": {
     "@better-auth/sso": "^1.4.16",

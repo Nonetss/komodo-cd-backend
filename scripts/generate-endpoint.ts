@@ -1,5 +1,5 @@
 import { mkdirSync, existsSync } from "node:fs";
-import path from "node:path";
+import * as path from "node:path";
 
 const version = Bun.env.VERSION_DEV || "0.0.0";
 const major = version.split(".")[0];
@@ -65,10 +65,10 @@ export const ${action}Route = createRoute({
 });
 `;
 
-const handlerContent = `import { RouteHandler } from "@hono/zod-openapi";
+const handlerContent = `import { Handler, Context } from "hono";
 import { ${action}Route } from "./${action}.route";
 
-export const ${action}Handler: RouteHandler<typeof ${action}Route> = async (c) => {
+export const ${action}Handler: Handler = async (c: Context) => {
   return c.json({
     success: true,
     message: "${ActionName} executed successfully",

@@ -5,6 +5,7 @@ import { Handler } from "hono";
 import { auth } from "@/core/auth";
 import { logger } from "hono/logger";
 import { bootstrap } from "@/lib/bootstrap";
+import api from "@/api";
 
 const app = new OpenAPIHono();
 
@@ -54,6 +55,8 @@ app.doc("/doc", {
 });
 
 app.get("/scalar", Scalar({ url: "/doc" }));
+
+app.route("/", api);
 
 // Ejecutar bootstrap al iniciar
 bootstrap().then(() => {

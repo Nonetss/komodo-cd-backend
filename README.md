@@ -147,18 +147,43 @@ Para habilitar SSO:
 
 ## Base de Datos
 
-### Migraciones con Drizzle
+### Database Management (Drizzle)
+
+...
+
+## Scripts de Generación Automática
+
+Este proyecto incluye herramientas para acelerar el desarrollo generando boilerplate siguiendo las convenciones establecidas.
+
+### 1. Generar Endpoints Individuales
+
+Crea la estructura completa de un endpoint (schema, route, handler, index) y lo registra en la jerarquía de la API.
 
 ```bash
-# Generar migraciones
-bunx drizzle-kit generate
-
-# Ejecutar migraciones
-bunx drizzle-kit migrate
-
-# Drizzle Studio (UI visual)
-bunx drizzle-kit studio
+# Formato: VERSION_DEV="x.x.x" bun run <metodo> <ruta/recurso>
+VERSION_DEV="0.0.1" bun run get user/profile
+VERSION_DEV="1.0.0" bun run post products/create
 ```
+
+_Soporta: `get`, `post`, `put`, `patch`, `delete`._
+
+### 2. Generar CRUD Completo
+
+Genera los 4 métodos básicos (`get`, `post`, `patch`, `delete`) para un recurso de una sola vez.
+
+```bash
+VERSION_DEV="0.0.1" bun run crud orders
+```
+
+### 3. Generar Tablas de Base de Datos
+
+Crea un nuevo archivo de tabla en `src/db/models/` y lo exporta automáticamente en `src/db/index.ts`.
+
+```bash
+bun run gen:table names_of_table
+```
+
+---
 
 ### Esquema
 

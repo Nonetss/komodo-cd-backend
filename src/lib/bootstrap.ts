@@ -1,7 +1,7 @@
 // Script de inicialización del backend
 import { db } from "@/core/config";
 import { user, ssoProvider } from "@/db/models/auth-schema";
-import { auth } from "@/db/auth";
+import { auth } from "@/core/auth";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 

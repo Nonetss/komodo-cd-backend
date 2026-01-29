@@ -2,7 +2,7 @@ import { Scalar } from "@scalar/hono-api-reference";
 import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { Handler } from "hono";
-import { auth } from "@/db/auth";
+import { auth } from "@/core/auth";
 import { logger } from "hono/logger";
 import { bootstrap } from "@/lib/bootstrap";
 

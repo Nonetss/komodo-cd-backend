@@ -1,4 +1,4 @@
-import { auth } from "@/db/auth";
+import { auth } from "@/core/auth";
 
 export const seedAdmin = async () => {
   const { user, token } = await auth.api.signUpEmail({

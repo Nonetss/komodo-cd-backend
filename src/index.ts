@@ -42,10 +42,6 @@ const rootHandler: Handler = (c: Context) => {
 
 app.openapi(rootRoute, rootHandler);
 
-app.get("/", (c) => {
-  return c.text("Hello Hono!");
-});
-
 app.doc("/doc", {
   openapi: "3.0.0",
   info: {

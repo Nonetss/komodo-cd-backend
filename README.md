@@ -180,7 +180,19 @@ VERSION_DEV="0.0.1" bun run crud orders
 Crea un nuevo archivo de tabla en `src/db/models/` y lo exporta automáticamente en `src/db/index.ts`.
 
 ```bash
+
 bun run gen:table names_of_table
+
+```
+
+### 4. Generar Endpoint SSE (Server-Sent Events)
+
+Crea un endpoint configurado para streaming de eventos en tiempo real.
+
+```bash
+
+VERSION_DEV="0.0.1" bun run sse notifications/live
+
 ```
 
 ---

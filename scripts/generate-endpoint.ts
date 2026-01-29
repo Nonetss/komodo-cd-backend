@@ -66,7 +66,6 @@ export const ${action}Route = createRoute({
 `;
 
 const handlerContent = `import { Handler, Context } from "hono";
-import { ${action}Route } from "./${action}.route";
 
 export const ${action}Handler: Handler = async (c: Context) => {
   return c.json({

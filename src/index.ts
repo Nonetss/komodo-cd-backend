@@ -3,14 +3,17 @@ import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 import { Handler, Context } from "hono";
 import { auth } from "@/core/auth";
+import type { User, Session } from "better-auth/types";
 import { logger } from "hono/logger";
 import { bootstrap } from "@/lib/bootstrap";
 import api from "@/api";
+import { authMiddleware } from "@/middleware";
 
-const app = new OpenAPIHono();
+const app = new OpenAPIHono<{ Variables: { user: User; session: Session } }>();
 
 app.use("*", cors());
 app.use("*", logger());
+app.use("/api/*", authMiddleware);
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => {
   return auth.handler(c.req.raw);

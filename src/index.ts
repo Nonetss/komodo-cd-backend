@@ -22,7 +22,7 @@ const rootSchema = z.object({
 
 const rootRoute = createRoute({
   method: "get",
-  path: "",
+  path: "/health-check",
   tags: ["Health Check"],
   responses: {
     200: {

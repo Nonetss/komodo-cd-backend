@@ -2,7 +2,12 @@
   "name": "template-hono",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "get": "bun run scripts/generate-endpoint.ts get",
+    "post": "bun run scripts/generate-endpoint.ts post",
+    "put": "bun run scripts/generate-endpoint.ts put",
+    "patch": "bun run scripts/generate-endpoint.ts patch",
+    "delete": "bun run scripts/generate-endpoint.ts delete"
   },
   "dependencies": {
     "@better-auth/sso": "^1.4.16",

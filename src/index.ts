@@ -1,7 +1,7 @@
 import { Scalar } from "@scalar/hono-api-reference";
 import { z, createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
-import { Handler } from "hono";
+import { Handler, Context } from "hono";
 import { auth } from "@/core/auth";
 import { logger } from "hono/logger";
 import { bootstrap } from "@/lib/bootstrap";
@@ -17,13 +17,13 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => {
 });
 
 const rootSchema = z.object({
-  message: z.string().openapi({ example: "Hello, World!" }),
+  message: z.string().openapi({ example: "API is running" }),
 });
 
 const rootRoute = createRoute({
   method: "get",
   path: "",
-  request: {},
+  tags: ["Health Check"],
   responses: {
     200: {
       content: {
@@ -31,13 +31,13 @@ const rootRoute = createRoute({
           schema: rootSchema,
         },
       },
-      description: "Root endpoint",
+      description: "Health Check endpoint",
     },
   },
 });
 
-const rootHandler: Handler = (c) => {
-  return c.json({ message: "Hello, World!" });
+const rootHandler: Handler = (c: Context) => {
+  return c.json({ message: "API is running" });
 };
 
 app.openapi(rootRoute, rootHandler);

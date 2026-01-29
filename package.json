@@ -1,5 +1,5 @@
 {
-  "name": "movida",
+  "name": "template-hono",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "prepare": "husky"

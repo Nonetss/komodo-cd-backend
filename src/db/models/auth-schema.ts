@@ -1,31 +1,39 @@
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  index,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
+  id: varchar("id", { length: 512 }).primaryKey(),
+  name: varchar("name", { length: 512 }).notNull(),
+  email: varchar("email", { length: 512 }).notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
-  image: text("image"),
+  image: varchar("image", { length: 512 }),
+  groups: text("groups"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .$onUpdate(() => new Date())
     .notNull(),
 });
 
 export const session = pgTable(
   "session",
   {
-    id: text("id").primaryKey(),
+    id: varchar("id", { length: 512 }).primaryKey(),
     expiresAt: timestamp("expires_at").notNull(),
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
-      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .$onUpdate(() => new Date())
       .notNull(),
-    ipAddress: text("ip_address"),
-    userAgent: text("user_agent"),
-    userId: text("user_id")
+    ipAddress: varchar("ip_address", { length: 512 }),
+    userAgent: varchar("user_agent", { length: 512 }),
+    userId: varchar("user_id", { length: 512 })
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
@@ -35,10 +43,10 @@ export const session = pgTable(
 export const account = pgTable(
   "account",
   {
-    id: text("id").primaryKey(),
-    accountId: text("account_id").notNull(),
-    providerId: text("provider_id").notNull(),
-    userId: text("user_id")
+    id: varchar("id", { length: 512 }).primaryKey(),
+    accountId: varchar("account_id", { length: 512 }).notNull(),
+    providerId: varchar("provider_id", { length: 512 }).notNull(),
+    userId: varchar("user_id", { length: 512 })
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     accessToken: text("access_token"),
@@ -46,11 +54,11 @@ export const account = pgTable(
     idToken: text("id_token"),
     accessTokenExpiresAt: timestamp("access_token_expires_at"),
     refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
-    scope: text("scope"),
-    password: text("password"),
+    scope: varchar("scope", { length: 512 }),
+    password: varchar("password", { length: 512 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
-      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .$onUpdate(() => new Date())
       .notNull(),
   },
   (table) => [index("account_userId_idx").on(table.userId)],
@@ -59,26 +67,28 @@ export const account = pgTable(
 export const verification = pgTable(
   "verification",
   {
-    id: text("id").primaryKey(),
-    identifier: text("identifier").notNull(),
+    id: varchar("id", { length: 512 }).primaryKey(),
+    identifier: varchar("identifier", { length: 512 }).notNull(),
     value: text("value").notNull(),
     expiresAt: timestamp("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
-      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .$onUpdate(() => new Date())
       .notNull(),
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
 export const ssoProvider = pgTable("sso_provider", {
-  id: text("id").primaryKey(),
-  issuer: text("issuer").notNull(),
+  id: varchar("id", { length: 512 }).primaryKey(),
+  issuer: varchar("issuer", { length: 512 }).notNull(),
   oidcConfig: text("oidc_config"),
   samlConfig: text("saml_config"),
-  userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
-  providerId: text("provider_id").notNull().unique(),
-  organizationId: text("organization_id"),
-  domain: text("domain").notNull(),
+  userId: varchar("user_id", { length: 512 }).references(() => user.id, {
+    onDelete: "cascade",
+  }),
+  providerId: varchar("provider_id", { length: 512 }).notNull().unique(),
+  organizationId: varchar("organization_id", { length: 512 }),
+  domain: varchar("domain", { length: 512 }).notNull(),
 });

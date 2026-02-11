@@ -1,2 +1,4 @@
+# Husky 9+ no usa husky.sh; asegurar que bun esté en el PATH
 export PATH="$HOME/.bun/bin:$PATH"
+
 bun x lint-staged

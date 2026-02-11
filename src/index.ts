@@ -13,7 +13,7 @@ const app = new OpenAPIHono<{ Variables: { user: User; session: Session } }>();
 
 app.use("*", cors());
 app.use("*", logger());
-app.use("/api/*", authMiddleware);
+app.use("/api/v0/*", authMiddleware);
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => {
   return auth.handler(c.req.raw);

@@ -1,21 +1,21 @@
 // src/db/auth.ts
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { genericOAuth, keycloak } from "better-auth/plugins/generic-oauth";
 import { db } from "@/core/config";
 import {
-  user,
+  user as userTable,
   session,
   account,
   verification,
   ssoProvider,
 } from "@/db/models/auth-schema";
-import { sso } from "@better-auth/sso";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
-      user: user,
+      user: userTable,
       session: session,
       account: account,
       verification: verification,
@@ -25,17 +25,43 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  baseURL: process.env.BETTER_AUTH_URL || "",
-  secret: process.env.BETTER_AUTH_SECRET || "",
-  trustedOrigins: [
-    process.env.BETTER_AUTH_URL || "",
-    process.env.SSO_BASE_URL || "",
-  ],
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["keycloak"],
     },
   },
-  plugins: [sso()],
+  user: {
+    additionalFields: {
+      groups: {
+        type: "string[]",
+        required: true,
+      },
+    },
+  },
+
+  plugins: [
+    genericOAuth({
+      config: [
+        {
+          providerId: "keycloak",
+          clientId: process.env.SSO_CLIENT_ID || "",
+          clientSecret: process.env.SSO_CLIENT_SECRET || "",
+          discoveryUrl: process.env.SSO_ISSUER || "",
+          scopes: ["openid", "profile", "email"],
+          pkce: true,
+          overrideUserInfo: true,
+          mapProfileToUser: async (profile) => {
+            return {
+              id: profile.sub,
+              email: profile.email,
+              name: profile.name,
+              image: profile.picture,
+              groups: profile.groups,
+            };
+          },
+        },
+      ],
+    }),
+  ],
 });

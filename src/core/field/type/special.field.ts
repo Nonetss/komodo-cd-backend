@@ -27,13 +27,12 @@ export class SpecialField extends Field {
     options: FieldOptions,
     protected readonly subtype: SpecialFieldType,
   ) {
-    super(name, description, required, uiComponent, options);
+    super(name, description, required, uiComponent, options, {
+      subtype: subtype,
+    });
   }
 
   public override getData() {
-    return {
-      ...super.getData(),
-      typeData: { subtype: this.subtype } satisfies SpecialFieldTypeData,
-    };
+    return super.getData();
   }
 }

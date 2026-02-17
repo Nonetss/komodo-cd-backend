@@ -1,5 +1,6 @@
 import {
   Field,
+  FieldData,
   FieldOptions,
   FieldType,
   UIComponent,
@@ -10,8 +11,8 @@ export enum SpecialFieldType {
   GROUPS = "groups",
 }
 
-/** typeData cuando el campo es tipo SPECIAL */
-export interface SpecialFieldTypeData {
+/** Forma de getData() cuando el campo es tipo SPECIAL (incluye subtype en el mismo nivel) */
+export interface SpecialFieldTypeData extends FieldData {
   subtype: SpecialFieldType;
 }
 
@@ -25,14 +26,14 @@ export class SpecialField extends Field {
     required: boolean = false,
     uiComponent: UIComponent,
     options: FieldOptions,
-    protected readonly subtype: SpecialFieldType,
+    subtype: SpecialFieldType,
   ) {
     super(name, description, required, uiComponent, options, {
       subtype: subtype,
     });
   }
 
-  public override getData() {
-    return super.getData();
+  public override getData(): SpecialFieldTypeData {
+    return super.getData() as SpecialFieldTypeData;
   }
 }

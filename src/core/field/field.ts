@@ -21,8 +21,8 @@ export interface FieldData {
   required: boolean;
   uiComponent: UIComponent;
   options: FieldOptions;
-  /** Información extra que puedes añadir en las clases que extiendan Field */
-  extra?: Record<string, unknown>;
+  /** Más información que añadas en subclases (claves dinámicas en el mismo nivel) */
+  [key: string]: unknown;
 }
 
 export enum FieldType {
@@ -62,7 +62,7 @@ export abstract class Field {
       required: this.required,
       uiComponent: this.uiComponent,
       options: this.options,
-      ...(Object.keys(this.extra).length > 0 && { extra: this.extra }),
+      ...this.extra,
     };
   }
 }

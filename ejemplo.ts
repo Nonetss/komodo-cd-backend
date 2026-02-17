@@ -2,7 +2,6 @@ import { Field, FieldType, UIComponent } from "@/core/field/field";
 import {
   SpecialField,
   SpecialFieldType,
-  SpecialFieldTypeData,
 } from "@/core/field/type/special.field";
 
 // --- Crear un campo especial (p. ej. asignar trabajador)
@@ -27,7 +26,7 @@ console.log(datos);
 //   required: true,
 //   uiComponent: "special",
 //   options: { isArray: false, isRequired: true },
-//   typeData: { subtype: "worker" }
+//   subtype: "worker"   ← información extra en el mismo nivel
 // }
 
 // --- Usar varios campos de forma polimórfica (Field es la base)
@@ -44,11 +43,10 @@ const campos: Field[] = [
   ),
 ];
 
-// --- Recorrer y usar typeData cuando el tipo es SPECIAL
+// --- La info extra queda en el mismo nivel (p. ej. subtype)
 for (const campo of campos) {
   const data = campo.getData();
-  if (data.type === FieldType.SPECIAL && data.typeData) {
-    const typeData = data.typeData as SpecialFieldTypeData;
-    console.log(`Campo especial con subtype: ${typeData.subtype}`);
+  if (data.type === FieldType.SPECIAL && "subtype" in data) {
+    console.log(`Campo especial con subtype: ${data.subtype}`);
   }
 }

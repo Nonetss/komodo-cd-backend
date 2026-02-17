@@ -4,8 +4,8 @@ import { cors } from "hono/cors";
 import { Handler, Context } from "hono";
 import { auth } from "@/core/auth";
 import type { User, Session } from "better-auth/types";
-import { logger } from "hono/logger";
-import { logger as customLogger } from "@/lib/logger";
+import { logger as honoLogger } from "hono/logger";
+import { logger } from "@/lib/logger";
 import { bootstrap } from "@/lib/bootstrap";
 import api from "@/api";
 import { authMiddleware } from "@/middleware";
@@ -20,7 +20,7 @@ const app = new OpenAPIHono<{
 }>();
 
 app.onError((err, c) => {
-  customLogger.error(`${err}`);
+  logger.error(`${err}`);
   const status = err instanceof HTTPException ? err.status : 500;
   const errorResponse = new ErrorEndpoint(
     status,
@@ -31,7 +31,7 @@ app.onError((err, c) => {
 });
 
 app.use("*", cors());
-app.use("*", logger());
+app.use("*", honoLogger());
 app.use("/api/v0/*", authMiddleware);
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => {
@@ -76,8 +76,18 @@ app.get("/scalar", Scalar({ url: "/doc" }));
 
 app.route("/", api);
 
-// Ejecutar bootstrap al iniciar
+// Ejecutar bootstrap e iniciar servicios al iniciar
 bootstrap().then(() => {
-  Bun.serve({ port: 3000, fetch: app.fetch });
-  console.log("🌐 Servidor corriendo en http://localhost:3000");
+  const server = Bun.serve({ port: 3000, fetch: app.fetch });
+  logger.info("🌐 Servidor corriendo en http://localhost:3000");
+
+  const shutdown = async () => {
+    logger.info("🛑 Señal de apagado recibida, cerrando servidor...");
+    server.stop();
+    logger.info("✅ Servidor cerrado correctamente");
+    process.exit(0);
+  };
+
+  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", shutdown);
 });

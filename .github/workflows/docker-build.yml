@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - "v*"
-      - "V*"
       - "main"
 
 jobs:
@@ -16,7 +15,7 @@ jobs:
       - name: Login to Gitea Registry
         run: |
           REGISTRY_DOMAIN=$(echo ${{ github.server_url }} | awk -F[/:] '{print $4}')
-          echo "${{ secrets.MY_PASSWORD }}" | docker login $REGISTRY_DOMAIN -u nonete --password-stdin
+          echo "${{ secrets.MY_PASSWORD }}" | docker login $REGISTRY_DOMAIN -u ${{ secrets.MY_USERNAME }} --password-stdin
 
       - name: Build and Push
         run: |

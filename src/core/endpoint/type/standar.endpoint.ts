@@ -1,7 +1,7 @@
 import { Endpoint } from "@/core/endpoint/endpoint";
 
-export class StandardEndpoint extends Endpoint {
-  constructor(data: Record<string, unknown>) {
+export class StandardEndpoint<TData> extends Endpoint<TData> {
+  constructor(data: TData) {
     super(data);
   }
 }

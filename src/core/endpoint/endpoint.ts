@@ -1,26 +1,24 @@
-export interface EndpointData {
-  data: Record<string, unknown>;
-  metadata: Record<string, unknown>;
+export interface EndpointData<TData, TMeta = {}> {
+  data: TData;
+  metadata: { exists: boolean } & TMeta;
 }
 
-export abstract class Endpoint {
+export abstract class Endpoint<TData, TMeta = {}> {
   constructor(
-    protected data: Record<string, unknown>,
-    protected metadata: Record<string, unknown> = {},
-  ) {
-    this.data = data;
-    this.metadata = metadata;
-  }
+    protected data: TData,
+    protected metadata: TMeta = {} as TMeta,
+  ) {}
 
   protected exists(): boolean {
     return (
       this.data !== undefined &&
       this.data !== null &&
-      Object.keys(this.data).length > 0
+      typeof this.data === "object" &&
+      Object.keys(this.data as object).length > 0
     );
   }
 
-  public getData(): EndpointData {
+  public getData(): EndpointData<TData, TMeta> {
     return {
       data: this.data,
       metadata: {

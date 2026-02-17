@@ -5,11 +5,30 @@ import { Handler, Context } from "hono";
 import { auth } from "@/core/auth";
 import type { User, Session } from "better-auth/types";
 import { logger } from "hono/logger";
+import { logger as customLogger } from "@/lib/logger";
 import { bootstrap } from "@/lib/bootstrap";
 import api from "@/api";
 import { authMiddleware } from "@/middleware";
+import { ErrorEndpoint } from "./core/endpoint";
+import { HTTPException } from "hono/http-exception";
 
-const app = new OpenAPIHono<{ Variables: { user: User; session: Session } }>();
+const app = new OpenAPIHono<{
+  Variables: {
+    user: User | null;
+    session: Session | null;
+  };
+}>();
+
+app.onError((err, c) => {
+  customLogger.error(`${err}`);
+  const status = err instanceof HTTPException ? err.status : 500;
+  const errorResponse = new ErrorEndpoint(
+    status,
+    "INTERNAL_ERROR",
+    err.message,
+  );
+  return c.json(errorResponse.getData(), status);
+});
 
 app.use("*", cors());
 app.use("*", logger());

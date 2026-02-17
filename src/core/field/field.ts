@@ -21,8 +21,6 @@ export interface FieldData {
   required: boolean;
   uiComponent: UIComponent;
   options: FieldOptions;
-  /** Más información que añadas en subclases (claves dinámicas en el mismo nivel) */
-  [key: string]: unknown;
 }
 
 export enum FieldType {
@@ -35,7 +33,7 @@ export enum FieldType {
   SPECIAL = "SPECIAL",
 }
 
-export abstract class Field {
+export abstract class Field<T extends FieldData = FieldData> {
   abstract readonly id: string;
   abstract readonly type: FieldType;
 
@@ -45,15 +43,9 @@ export abstract class Field {
     protected required: boolean = false,
     protected uiComponent: UIComponent,
     protected options: FieldOptions,
-    ...extra: Record<string, unknown>[]
-  ) {
-    this.extra = extra.length > 0 ? Object.assign({}, ...extra) : {};
-  }
+  ) {}
 
-  /** Información extra; las subclases pueden leerla, añadirla o modificarla */
-  protected extra: Record<string, unknown>;
-
-  public getData(): FieldData {
+  public getData(): T {
     return {
       id: this.id,
       name: this.name,
@@ -62,7 +54,6 @@ export abstract class Field {
       required: this.required,
       uiComponent: this.uiComponent,
       options: this.options,
-      ...this.extra,
-    };
+    } as T;
   }
 }

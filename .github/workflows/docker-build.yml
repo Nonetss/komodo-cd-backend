@@ -4,34 +4,40 @@ on:
   push:
     branches:
       - "v*"
+      - "V*"
       - "main"
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Login to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Login to Gitea Registry
+        run: |
+          REGISTRY_DOMAIN=$(echo ${{ github.server_url }} | awk -F[/:] '{print $4}')
+          echo "${{ secrets.MY_PASSWORD }}" | docker login $REGISTRY_DOMAIN -u nonete --password-stdin
 
       - name: Build and Push
         run: |
-          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/${{ github.repository }}
+          # 1. Extraer dominio y limpiar nombre de imagen
+          REGISTRY_DOMAIN=$(echo ${{ github.server_url }} | awk -F[/:] '{print $4}')
+          IMAGE_ID=$REGISTRY_DOMAIN/${{ github.repository }}
           IMAGE_ID=$(echo $IMAGE_ID | tr '[:upper:]' '[:lower:]')
 
+          # 2. Extraer "esas movidas" (Rama y Hash corto)
           BRANCH=${{ github.ref_name }}
           SHA=$(echo ${{ github.sha }} | cut -c1-8)
 
+          echo "Building image for branch: $BRANCH with SHA: $SHA"
+
+          # 3. Build con múltiples etiquetas
           docker build . \
             -t $IMAGE_ID:latest \
             -t $IMAGE_ID:$BRANCH \
             -t $IMAGE_ID:$BRANCH-$SHA
 
+          # 4. Push de todas las etiquetas
           docker push $IMAGE_ID:latest
           docker push $IMAGE_ID:$BRANCH
           docker push $IMAGE_ID:$BRANCH-$SHA

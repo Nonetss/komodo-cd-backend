@@ -4,13 +4,13 @@ export interface FieldOptions {
 }
 
 export enum UIComponent {
-  TEXT = "text",
-  TEXTAREA = "textarea",
-  NUMBER = "number",
-  BOOLEAN = "boolean",
-  DATE = "date",
-  TIME = "time",
-  SPECIAL = "special",
+  TEXT = "TEXT",
+  TEXTAREA = "TEXTAREA",
+  NUMBER = "NUMBER",
+  BOOLEAN = "BOOLEAN",
+  DATE = "DATE",
+  TIME = "TIME",
+  SPECIAL = "SPECIAL",
 }
 
 export interface FieldData {
@@ -26,13 +26,13 @@ export interface FieldData {
 }
 
 export enum FieldType {
-  TEXT = "text",
-  TEXTAREA = "textarea",
-  NUMBER = "number",
-  BOOLEAN = "boolean",
-  DATE = "date",
-  TIME = "time",
-  SPECIAL = "special",
+  TEXT = "TEXT",
+  TEXTAREA = "TEXTAREA",
+  NUMBER = "NUMBER",
+  BOOLEAN = "BOOLEAN",
+  DATE = "DATE",
+  TIME = "TIME",
+  SPECIAL = "SPECIAL",
 }
 
 export abstract class Field {

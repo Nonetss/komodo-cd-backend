@@ -14,8 +14,4 @@ export const relations = defineRelations(schema, (r) => ({
   account: {
     user: r.one.user({ from: r.account.userId, to: r.user.id }),
   },
-
-  ssoProvider: {
-    user: r.one.user({ from: r.ssoProvider.userId, to: r.user.id }),
-  },
 }));

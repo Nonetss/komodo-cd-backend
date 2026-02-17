@@ -79,16 +79,3 @@ export const verification = pgTable(
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
-
-export const ssoProvider = pgTable("sso_provider", {
-  id: varchar("id", { length: 512 }).primaryKey(),
-  issuer: varchar("issuer", { length: 512 }).notNull(),
-  oidcConfig: text("oidc_config"),
-  samlConfig: text("saml_config"),
-  userId: varchar("user_id", { length: 512 }).references(() => user.id, {
-    onDelete: "cascade",
-  }),
-  providerId: varchar("provider_id", { length: 512 }).notNull().unique(),
-  organizationId: varchar("organization_id", { length: 512 }),
-  domain: varchar("domain", { length: 512 }).notNull(),
-});

@@ -5,15 +5,14 @@ Template de backend moderno y listo para producción usando **Hono**, **Better A
 ## Características
 
 - **[Hono](https://hono.dev/)**: Framework web ultrarrápido y ligero.
-- **[Better Auth](https://www.better-auth.com/)**: Autenticación completa con soporte para email/password, OAuth y SSO.
+- **[Better Auth](https://www.better-auth.com/)**: Autenticación completa con soporte para email/password y OAuth.
 - **[Drizzle ORM](https://orm.drizzle.team/)**: ORM tipado y seguro para TypeScript.
 - **[OpenAPI](https://github.com/honojs/middleware/tree/main/packages/zod-openapi)**: Especificación de API con `@hono/zod-openapi`.
 - **[Scalar](https://scalar.com/)**: Documentación de API interactiva.
 - **[Zod](https://zod.dev/)**: Validación de esquemas TypeScript-first.
 - **[Bun](https://bun.sh/)**: Runtime de JavaScript ultrarrápido.
 - **Docker Ready**: Listo para desplegar con Docker y Docker Compose.
-- **SSO con Authentik**: Integración preconfigurada con proveedores OIDC.
-- **Bootstrap automático**: Creación de usuario admin y configuración SSO al iniciar.
+- **Bootstrap automático**: Creación de usuario admin al iniciar.
 
 ## Stack Completo
 
@@ -73,14 +72,6 @@ BETTER_AUTH_SECRET="tu-secreto-seguro"
 GOOGLE_CLIENT_ID=""
 GOOGLE_CLIENT_SECRET=""
 
-# SSO Authentik (opcional)
-ENABLE_SSO="false"
-SSO_SLUG_APP="tu-app-slug"
-SSO_BASE_URL="https://tu-servidor-sso.com"
-SSO_CLIENT_ID="tu-client-id"
-SSO_CLIENT_SECRET="tu-client-secret"
-SSO_DOMAIN="tu-dominio.com"
-
 # Usuario Admin (bootstrap)
 SEED_ADMIN_EMAIL="admin@example.com"
 SEED_ADMIN_NAME="Admin"
@@ -116,7 +107,6 @@ El servidor estará disponible en `http://localhost:3000`.
 Al iniciar, el backend ejecuta automáticamente:
 
 1. **Creación de usuario admin**: Si `SEED_ADMIN_EMAIL` está definido y el usuario no existe, lo crea.
-2. **Configuración SSO**: Si `ENABLE_SSO=true`, registra o actualiza el proveedor SSO (Authentik).
 
 ## Documentación de la API
 
@@ -136,14 +126,6 @@ El backend expone los endpoints de Better Auth en `/api/auth/*`:
 | `/api/auth/sign-in/social` | POST   | Login con OAuth (Google)    |
 | `/api/auth/sign-out`       | POST   | Cerrar sesión               |
 | `/api/auth/session`        | GET    | Obtener sesión actual       |
-
-### SSO con Authentik
-
-Para habilitar SSO:
-
-1. Configura `ENABLE_SSO="true"` en tu `.env`
-2. Añade las credenciales de tu aplicación en Authentik
-3. Reinicia el servidor
 
 ## Base de Datos
 
@@ -205,7 +187,6 @@ El esquema incluye las tablas de Better Auth:
 - `session` - Sesiones activas
 - `account` - Cuentas vinculadas (OAuth, credentials)
 - `verification` - Tokens de verificación
-- `sso_provider` - Proveedores SSO configurados
 
 ## Docker
 
@@ -236,8 +217,7 @@ src/
 │   └── relations.ts     # Relaciones entre tablas
 ├── lib/                 # Utilidades
 │   ├── bootstrap.ts     # Inicialización automática
-│   ├── seedAdmin.ts     # Script para crear admin
-│   └── seedSSO.ts       # Script para configurar SSO
+│   └── seedAdmin.ts     # Script para crear admin
 └── index.ts             # Punto de entrada
 ```
 

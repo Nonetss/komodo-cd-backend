@@ -8,7 +8,6 @@ import {
   session,
   account,
   verification,
-  ssoProvider,
 } from "@/db/models/auth-schema";
 
 export const auth = betterAuth({
@@ -19,7 +18,6 @@ export const auth = betterAuth({
       session: session,
       account: account,
       verification: verification,
-      ssoProvider: ssoProvider,
     },
   }),
   emailAndPassword: {

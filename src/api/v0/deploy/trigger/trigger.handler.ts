@@ -7,13 +7,10 @@ export const triggerHandler: Handler = async (c: Context) => {
   logger.info(`🚀 Deploy trigger — stack: ${stack}, action: ${action}`);
 
   try {
-    if (action === "build" || action === "build-pull-redeploy") {
-      await komodoService.buildImage(stack, "latest");
-    }
-    if (action === "pull" || action === "build-pull-redeploy") {
+    if (action === "pull") {
       await komodoService.pullImage(stack);
     }
-    if (action === "redeploy" || action === "build-pull-redeploy") {
+    if (action === "redeploy") {
       await komodoService.redeploy(stack);
     }
 

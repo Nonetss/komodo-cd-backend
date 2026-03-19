@@ -78,24 +78,14 @@ class KomodoService {
 
   async pullImage(stackName: string) {
     const client = this.ensureClient();
-    logger.info(`📥 Pulling image for stack: ${stackName}`);
+    logger.info(`📥 Pulling stack: ${stackName}`);
 
     try {
-      // Pull the latest image
-      const stacks = (await client.read(
-        "ListStacks",
-        {},
-      )) as Types.StackListItem[];
-      const stack = stacks.find((s) => s.name === stackName);
-
-      if (!stack) {
-        throw new Error(`Stack not found: ${stackName}`);
-      }
-
-      logger.info(`✅ Image pulled for stack: ${stackName}`);
-      return stack;
+      const result = await client.execute("PullStack", { stack: stackName });
+      logger.info(`✅ Pull completed for stack: ${stackName}`);
+      return result;
     } catch (error) {
-      logger.error(`❌ Failed to pull image for ${stackName}:`, error);
+      logger.error(`❌ Failed to pull stack ${stackName}:`, error);
       throw error;
     }
   }

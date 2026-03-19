@@ -28,6 +28,7 @@ COPY --from=prerelease /app/tsconfig.json .
 # Directorio persistente para la base de datos SQLite
 # → montar como volumen en producción: -v komodo_data:/data
 RUN mkdir -p /data && chown -R bun:bun /data
+ENV NODE_ENV=production
 ENV DATABASE_URL="file:/data/db.sqlite"
 
 USER bun

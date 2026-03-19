@@ -1,206 +1,145 @@
-# komodo-action
+# Komodo Backend
 
-Backend para automatizar deploys en **Komodo** desde webhooks de GitHub/Gitea. Construido con **Hono**, **Better Auth**, **Drizzle ORM** y **Bun**.
+API REST para gestionar y disparar deploys sobre stacks de [Komodo](https://komo.do) desde GitHub Actions, Gitea Actions o cualquier cliente HTTP. Construida con **Hono** + **Bun**, autenticación con **Better Auth** y persistencia en **SQLite** via Drizzle ORM.
 
 ## Stack
 
-- **[Hono](https://hono.dev/)** — Framework web ultrarrápido
-- **[Better Auth](https://www.better-auth.com/)** — Autenticación con email/password y OAuth
-- **[Drizzle ORM](https://orm.drizzle.team/)** — ORM tipado para TypeScript
-- **[SQLite (libsql)](https://github.com/tursodatabase/libsql)** — Base de datos local
-- **[Komodo Client](https://komo.do)** — Cliente oficial de Komodo
-- **[Bun](https://bun.sh/)** — Runtime JavaScript ultrarrápido
+- **[Bun](https://bun.sh/)** — Runtime y gestor de paquetes
+- **[Hono](https://hono.dev/)** + [`@hono/zod-openapi`](https://github.com/honojs/middleware/tree/main/packages/zod-openapi) — Framework web con validación y OpenAPI
+- **[Better Auth](https://www.better-auth.com/)** — Autenticación: email/password, API Keys y SSO/Keycloak
+- **[Drizzle ORM](https://orm.drizzle.team/)** + **[libsql](https://github.com/tursodatabase/libsql)** — ORM tipado sobre SQLite
+- **[Komodo Client](https://komo.do)** — Cliente oficial para interactuar con la plataforma Komodo
+- **[Scalar](https://scalar.com/)** — Documentación interactiva OpenAPI
 
-## Instalación
+## Endpoints
 
-```bash
-bun install
-cp .env.example .env
-# Edita .env con tus valores
-bun run dev
-```
+| Método   | Ruta                         | Auth             | Descripción                                      |
+| -------- | ---------------------------- | ---------------- | ------------------------------------------------ |
+| `POST`   | `/api/v0/deploy`             | API Key / sesión | Dispara una acción sobre un stack                |
+| `GET`    | `/api/v0/stacks`             | API Key / sesión | Lista los stacks con estado, servicios y commits |
+| `GET`    | `/api/v0/history`            | sesión           | Historial de acciones con usuario                |
+| `GET`    | `/api/v0/apikeys`            | sesión           | Lista las API Keys del usuario                   |
+| `POST`   | `/api/v0/apikeys`            | sesión           | Crea una nueva API Key                           |
+| `DELETE` | `/api/v0/apikeys`            | sesión           | Elimina una API Key                              |
+| `GET`    | `/api/v0/deploy/credentials` | sesión           | Lista las credenciales de Komodo                 |
+| `POST`   | `/api/v0/deploy/credentials` | sesión           | Guarda una credencial de Komodo                  |
+| `DELETE` | `/api/v0/deploy/credentials` | sesión           | Elimina una credencial de Komodo                 |
+| `GET`    | `/health-check`              | —                | Health check                                     |
+| `GET`    | `/scalar`                    | —                | Documentación interactiva                        |
+| `GET`    | `/doc`                       | —                | OpenAPI JSON                                     |
 
-Las migraciones se aplican automáticamente al arrancar.
+### Acciones de deploy
 
-## Variables de Entorno
-
-```env
-DATABASE_URL="file:./dev.db"
-
-BETTER_AUTH_URL="http://localhost:3000"
-BETTER_AUTH_SECRET="tu-secreto-seguro"
-
-SEED_ADMIN_EMAIL="admin@example.com"
-SEED_ADMIN_NAME="Admin"
-SEED_ADMIN_PASSWORD="tu-password-seguro"
-```
-
-## Integración con Komodo
-
-### 1. Guardar credenciales de Komodo
-
-Después de iniciar el servidor, guarda tus credenciales de Komodo (se almacenan en la BD):
-
-```bash
-curl -X POST http://localhost:3000/api/v0/deploy/credentials \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <tu-token>" \
-  -d '{
-    "name": "production",
-    "url": "https://tu-komodo.com",
-    "key": "tu-api-key",
-    "secret": "tu-api-secret"
-  }'
-```
-
-### 2. Trigger de deploy (GitHub Actions / Gitea)
-
-Envía una petición con el token de Better Auth y el stack a desplegar:
-
-```bash
-curl -X POST http://localhost:3000/api/v0/deploy/trigger \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <tu-token>" \
-  -d '{
-    "stack": "mi-stack",
-    "action": "build-pull-redeploy"
-  }'
-```
-
-**Acciones disponibles:**
-
-- `build` — Solo build de la imagen
-- `pull` — Solo pull de la imagen
-- `redeploy` — Solo redeploy del stack
-- `build-pull-redeploy` — Pipeline completo
-
-### Workflow GitHub Actions
-
-```yaml
-name: Deploy to Komodo
-
-on:
-  release:
-    types: [published]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger deploy
-        run: |
-          curl -X POST ${{ secrets.BACKEND_URL }}/api/v0/deploy/trigger \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.BACKEND_TOKEN }}" \
-            -d '{
-              "stack": "${{ vars.KOMODO_STACK }}",
-              "action": "build-pull-redeploy"
-            }'
-```
-
-### Workflow Gitea Actions
-
-```yaml
-name: Deploy to Komodo
-
-on:
-  release:
-    types: [published]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger deploy
-        run: |
-          curl -X POST ${{ secrets.BACKEND_URL }}/api/v0/deploy/trigger \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.BACKEND_TOKEN }}" \
-            -d '{
-              "stack": "${{ vars.KOMODO_STACK }}",
-              "action": "build-pull-redeploy"
-            }'
-```
-
-**Secrets necesarios en el repositorio:**
-
-- `BACKEND_URL` — URL de este backend (ej: `https://tu-backend.com`)
-- `BACKEND_TOKEN` — Token de sesión de Better Auth
-- `KOMODO_STACK` — Nombre del stack en Komodo
-
-## Endpoints de Deploy
-
-| Método   | Endpoint                            | Descripción                    |
-| -------- | ----------------------------------- | ------------------------------ |
-| `POST`   | `/api/v0/deploy/trigger`            | Disparar un deploy             |
-| `POST`   | `/api/v0/deploy/credentials`        | Guardar credenciales de Komodo |
-| `GET`    | `/api/v0/deploy/credentials-list`   | Listar credenciales            |
-| `DELETE` | `/api/v0/deploy/credentials-delete` | Eliminar credenciales          |
-
-## Endpoints de Auth (Better Auth)
-
-| Endpoint                  | Método | Descripción              |
-| ------------------------- | ------ | ------------------------ |
-| `/api/auth/sign-in/email` | POST   | Login con email/password |
-| `/api/auth/sign-up/email` | POST   | Registro                 |
-| `/api/auth/sign-out`      | POST   | Cerrar sesión            |
-| `/api/auth/session`       | GET    | Sesión actual            |
-
-## Documentación API
-
-Con el servidor corriendo:
-
-- **Scalar UI**: [http://localhost:3000/scalar](http://localhost:3000/scalar)
-- **OpenAPI JSON**: [http://localhost:3000/doc](http://localhost:3000/doc)
-
-## Estructura del Proyecto
-
-```
-src/
-├── api/
-│   ├── index.ts
-│   └── v0/
-│       └── deploy/
-│           ├── trigger/       # POST — trigger deploy
-│           ├── credentials/   # POST — guardar credenciales
-│           ├── credentials-list/   # GET — listar
-│           └── credentials-delete/ # DELETE — eliminar
-├── core/
-│   └── config.ts              # Conexión a SQLite
-├── db/
-│   ├── index.ts
-│   ├── models/
-│   │   ├── auth-schema.ts     # Tablas de Better Auth
-│   │   └── komodo.table.ts    # Tabla de credenciales Komodo
-│   └── relations.ts
-├── lib/
-│   ├── bootstrap.ts           # Migraciones + admin + komodo init
-│   └── logger.ts
-├── services/
-│   └── komodo.ts              # Cliente de Komodo
-└── index.ts
-```
-
-## Scripts de Generación
-
-```bash
-# Endpoint individual
-bun run post resources/create
-
-# CRUD completo
-bun run crud resources
-
-# Tabla de BD
-bun run gen:table nombre_tabla
-
-# Endpoint SSE
-bun run sse events/live
-```
+| Acción          | Descripción                              |
+| --------------- | ---------------------------------------- |
+| `pull`          | Pull de la imagen sin reiniciar el stack |
+| `redeploy`      | Detiene y vuelve a levantar el stack     |
+| `pull-redeploy` | Pull de imagen + redeploy completo       |
 
 ## Desarrollo
 
 ```bash
-bun run dev          # Servidor con hot reload
-bun drizzle-kit push # Aplicar esquema a la BD
-bun drizzle-kit studio # Abrir Drizzle Studio
+bun install
+cp .env.example .env
+# Editar .env con tus valores
+bun dev
+```
+
+El servidor arranca en `http://localhost:3000`.
+Las migraciones y el usuario admin se aplican automáticamente al iniciar.
+
+Si cambias el schema de la BD, genera una nueva migración:
+
+```bash
+bunx drizzle-kit generate
+```
+
+## Variables de entorno
+
+| Variable              | Requerida | Descripción                                                            |
+| --------------------- | --------- | ---------------------------------------------------------------------- |
+| `DATABASE_URL`        | ✅        | Ruta SQLite. Dev: `file:./dev.db` · Docker: `file:/data/db.sqlite`     |
+| `BETTER_AUTH_SECRET`  | ✅        | Secreto para firmar sesiones. `openssl rand -base64 32`                |
+| `BETTER_AUTH_URL`     | ✅        | URL pública del frontend. Para CORS y trusted origins                  |
+| `SEED_ADMIN_EMAIL`    | —         | Email del admin que se crea al arrancar si no existe                   |
+| `SEED_ADMIN_NAME`     | —         | Nombre del admin inicial                                               |
+| `SEED_ADMIN_PASSWORD` | —         | Contraseña del admin inicial                                           |
+| `SSO_CLIENT_ID`       | —         | Client ID de Keycloak (SSO opcional)                                   |
+| `SSO_CLIENT_SECRET`   | —         | Client Secret de Keycloak                                              |
+| `SSO_ISSUER`          | —         | Discovery URL del realm: `https://keycloak.example.com/realms/<realm>` |
+
+## Uso desde CI/CD
+
+La autenticación se hace con una API Key pasada en el header `x-api-key`. Las keys se generan desde el dashboard del frontend.
+
+```bash
+curl -X POST https://app.example.com/api/v0/deploy \
+  -H "x-api-key: <tu-api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"stack":"mi-stack","action":"pull-redeploy"}'
+```
+
+### GitHub Actions
+
+```yaml
+- name: Deploy
+  run: |
+    curl -X POST ${{ secrets.APP_URL }}/api/v0/deploy \
+      -H "x-api-key: ${{ secrets.KOMODO_API_KEY }}" \
+      -H "Content-Type: application/json" \
+      -d '{"stack":"${{ vars.STACK_NAME }}","action":"pull-redeploy"}'
+```
+
+**Secrets necesarios:**
+
+- `APP_URL` — URL pública de la app (ej: `https://app.example.com`)
+- `KOMODO_API_KEY` — API Key generada desde el dashboard
+
+## Docker
+
+La imagen expone el puerto `3000` y espera un volumen en `/data` para la BD SQLite.
+
+```bash
+docker build -t komodo-backend .
+
+docker run -d \
+  -p 3000:3000 \
+  -v komodo_data:/data \
+  -e BETTER_AUTH_SECRET=<secreto> \
+  -e BETTER_AUTH_URL=https://app.example.com \
+  -e SEED_ADMIN_EMAIL=admin@example.com \
+  -e SEED_ADMIN_PASSWORD=<password> \
+  komodo-backend
+```
+
+O con el `docker-compose.yml` del repositorio raíz (recomendado):
+
+```bash
+cp ../.env.example ../.env
+# Editar ../.env
+docker compose -f ../docker-compose.yml up -d --build
+```
+
+## Estructura
+
+```
+src/
+├── api/v0/
+│   ├── deploy/
+│   │   ├── trigger/          # POST /deploy — dispara acciones
+│   │   └── credentials/      # CRUD credenciales de Komodo
+│   ├── stacks/               # GET /stacks — estado de los stacks
+│   ├── history/              # GET /history — historial de acciones
+│   └── apikeys/              # CRUD API Keys
+├── core/
+│   ├── auth.ts               # Configuración de Better Auth
+│   └── config.ts             # Cliente de BD (Drizzle + libsql)
+├── db/models/                # Schemas de Drizzle
+├── lib/
+│   ├── bootstrap.ts          # Migraciones + seed admin al arrancar
+│   └── logger.ts
+├── middleware.ts              # Auth: sesión por cookie y API Key
+└── services/
+    └── komodo.ts             # Cliente de Komodo (PullStack, DeployStack)
+drizzle/                      # Migraciones SQL generadas
 ```

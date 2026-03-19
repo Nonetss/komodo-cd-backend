@@ -1,5 +1,7 @@
 # Komodo Backend
 
+> Parte de [Komodo CD](https://github.com/Nonetss/komodo-cd-backend). Frontend en [Nonetss/komodo-cd-frontend](https://github.com/Nonetss/komodo-cd-frontend).
+
 API REST para gestionar y disparar deploys sobre stacks de [Komodo](https://komo.do) desde GitHub Actions, Gitea Actions o cualquier cliente HTTP. Construida con **Hono** + **Bun**, autenticación con **Better Auth** y persistencia en **SQLite** via Drizzle ORM.
 
 ## Stack

@@ -18,6 +18,14 @@ const app = new OpenAPIHono<{
   };
 }>();
 
+app.openAPIRegistry.registerComponent("securitySchemes", "ApiKeyAuth", {
+  type: "apiKey",
+  in: "header",
+  name: "x-api-key",
+  description:
+    "API Key generada desde Better Auth. Pásala en el header `x-api-key`.",
+});
+
 app.onError((err, c) => {
   logger.error(`${err}`);
   const status = err instanceof HTTPException ? err.status : 500;
@@ -62,7 +70,10 @@ app.doc("/doc", {
   openapi: "3.0.0",
   info: {
     version: "1.0.0",
-    title: "My API",
+    title: "Komodo Action API",
+    description:
+      "API para gestionar credenciales de Komodo y disparar deploys. " +
+      "Todos los endpoints requieren autenticación mediante API Key (`x-api-key`) o sesión de usuario.",
   },
 });
 

@@ -1,13 +1,20 @@
-import { createRoute } from "@hono/zod-openapi";
+import { createRoute, z } from "@hono/zod-openapi";
 import { ListSchema } from "./list.schema";
+
+const ErrorSchema = z.object({
+  error: z.string().openapi({ example: "Unauthorized" }),
+});
 
 export const listRoute = createRoute({
   method: "get",
   path: "/",
   tags: ["Credentials"],
-  summary: "Listar credenciales de Komodo guardadas (sin exponer key/secret)",
+  summary: "Listar credenciales de Komodo",
   description:
-    "Listar credenciales de Komodo guardadas (sin exponer key/secret)",
+    "Devuelve todas las instancias de Komodo configuradas. " +
+    "Los campos `key` y `secret` nunca se exponen en la respuesta. " +
+    "Requiere autenticación via `x-api-key` o sesión.",
+  security: [{ ApiKeyAuth: [] }],
   responses: {
     200: {
       content: {
@@ -15,9 +22,15 @@ export const listRoute = createRoute({
           schema: ListSchema,
         },
       },
-      tags: ["Credentials"],
-      description:
-        "Listar credenciales de Komodo guardadas (sin exponer key/secret)",
+      description: "Lista de credenciales (sin key ni secret)",
+    },
+    401: {
+      content: {
+        "application/json": {
+          schema: ErrorSchema,
+        },
+      },
+      description: "No autenticado. Incluye un header `x-api-key` válido.",
     },
   },
 });

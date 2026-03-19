@@ -2,12 +2,14 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { genericOAuth, keycloak } from "better-auth/plugins/generic-oauth";
+import { apiKey } from "@better-auth/api-key";
 import { db } from "@/core/config";
 import {
   user as userTable,
   session,
   account,
   verification,
+  apikey,
 } from "@/db/models/auth-schema";
 
 export const auth = betterAuth({
@@ -18,6 +20,7 @@ export const auth = betterAuth({
       session: session,
       account: account,
       verification: verification,
+      apikey: apikey,
     },
   }),
   emailAndPassword: {
@@ -51,6 +54,7 @@ export const auth = betterAuth({
   },
 
   plugins: [
+    apiKey(),
     genericOAuth({
       config: [
         {

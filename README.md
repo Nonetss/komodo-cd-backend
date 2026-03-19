@@ -6,7 +6,7 @@ API REST para gestionar y disparar deploys sobre stacks de [Komodo](https://komo
 
 - **[Bun](https://bun.sh/)** — Runtime y gestor de paquetes
 - **[Hono](https://hono.dev/)** + [`@hono/zod-openapi`](https://github.com/honojs/middleware/tree/main/packages/zod-openapi) — Framework web con validación y OpenAPI
-- **[Better Auth](https://www.better-auth.com/)** — Autenticación: email/password, API Keys y SSO/Keycloak
+- **[Better Auth](https://www.better-auth.com/)** — Autenticación: email/password y API Keys
 - **[Drizzle ORM](https://orm.drizzle.team/)** + **[libsql](https://github.com/tursodatabase/libsql)** — ORM tipado sobre SQLite
 - **[Komodo Client](https://komo.do)** — Cliente oficial para interactuar con la plataforma Komodo
 - **[Scalar](https://scalar.com/)** — Documentación interactiva OpenAPI
@@ -56,17 +56,14 @@ bunx drizzle-kit generate
 
 ## Variables de entorno
 
-| Variable              | Requerida | Descripción                                                            |
-| --------------------- | --------- | ---------------------------------------------------------------------- |
-| `DATABASE_URL`        | ✅        | Ruta SQLite. Dev: `file:./dev.db` · Docker: `file:/data/db.sqlite`     |
-| `BETTER_AUTH_SECRET`  | ✅        | Secreto para firmar sesiones. `openssl rand -base64 32`                |
-| `BETTER_AUTH_URL`     | ✅        | URL pública del frontend. Para CORS y trusted origins                  |
-| `SEED_ADMIN_EMAIL`    | —         | Email del admin que se crea al arrancar si no existe                   |
-| `SEED_ADMIN_NAME`     | —         | Nombre del admin inicial                                               |
-| `SEED_ADMIN_PASSWORD` | —         | Contraseña del admin inicial                                           |
-| `SSO_CLIENT_ID`       | —         | Client ID de Keycloak (SSO opcional)                                   |
-| `SSO_CLIENT_SECRET`   | —         | Client Secret de Keycloak                                              |
-| `SSO_ISSUER`          | —         | Discovery URL del realm: `https://keycloak.example.com/realms/<realm>` |
+| Variable              | Requerida | Descripción                                                        |
+| --------------------- | --------- | ------------------------------------------------------------------ |
+| `DATABASE_URL`        | ✅        | Ruta SQLite. Dev: `file:./dev.db` · Docker: `file:/data/db.sqlite` |
+| `BETTER_AUTH_SECRET`  | ✅        | Secreto para firmar sesiones. `openssl rand -base64 32`            |
+| `BETTER_AUTH_URL`     | ✅        | URL pública del frontend. Para CORS y trusted origins              |
+| `SEED_ADMIN_EMAIL`    | —         | Email del admin que se crea al arrancar si no existe               |
+| `SEED_ADMIN_NAME`     | —         | Nombre del admin inicial                                           |
+| `SEED_ADMIN_PASSWORD` | —         | Contraseña del admin inicial                                       |
 
 ## Uso desde CI/CD
 

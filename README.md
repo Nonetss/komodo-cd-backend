@@ -1,240 +1,206 @@
-# Backend Template - Hono + Better Auth + Drizzle
+# komodo-action
 
-Template de backend moderno y listo para producción usando **Hono**, **Better Auth**, **Drizzle ORM** y **Bun**. Diseñado para trabajar en conjunto con el frontend [astro-template](https://github.com/Nonetss/astro-template).
+Backend para automatizar deploys en **Komodo** desde webhooks de GitHub/Gitea. Construido con **Hono**, **Better Auth**, **Drizzle ORM** y **Bun**.
 
-## Características
+## Stack
 
-- **[Hono](https://hono.dev/)**: Framework web ultrarrápido y ligero.
-- **[Better Auth](https://www.better-auth.com/)**: Autenticación completa con soporte para email/password y OAuth.
-- **[Drizzle ORM](https://orm.drizzle.team/)**: ORM tipado y seguro para TypeScript.
-- **[OpenAPI](https://github.com/honojs/middleware/tree/main/packages/zod-openapi)**: Especificación de API con `@hono/zod-openapi`.
-- **[Scalar](https://scalar.com/)**: Documentación de API interactiva.
-- **[Zod](https://zod.dev/)**: Validación de esquemas TypeScript-first.
-- **[Bun](https://bun.sh/)**: Runtime de JavaScript ultrarrápido.
-- **Docker Ready**: Listo para desplegar con Docker y Docker Compose.
-- **Bootstrap automático**: Creación de usuario admin al iniciar.
-
-## Stack Completo
-
-Este backend está diseñado para funcionar con:
-
-| Componente   | Repositorio                                                         |
-| ------------ | ------------------------------------------------------------------- |
-| **Frontend** | [Nonetss/astro-template](https://github.com/Nonetss/astro-template) |
-| **Backend**  | Este repositorio                                                    |
-
-El frontend utiliza Astro 5 con Tailwind CSS 4, React y Shadcn UI, también dockerizado y listo para producción.
-
-## Requisitos Previos
-
-- [Bun](https://bun.sh/) instalado:
-
-```bash
-curl -fsSL https://bun.sh/install | bash
-```
-
-- PostgreSQL (o usar Docker Compose incluido)
+- **[Hono](https://hono.dev/)** — Framework web ultrarrápido
+- **[Better Auth](https://www.better-auth.com/)** — Autenticación con email/password y OAuth
+- **[Drizzle ORM](https://orm.drizzle.team/)** — ORM tipado para TypeScript
+- **[SQLite (libsql)](https://github.com/tursodatabase/libsql)** — Base de datos local
+- **[Komodo Client](https://komo.do)** — Cliente oficial de Komodo
+- **[Bun](https://bun.sh/)** — Runtime JavaScript ultrarrápido
 
 ## Instalación
 
-1. Clona el repositorio:
-
-```bash
-git clone <tu-repo-url>
-cd backend
-```
-
-2. Instala las dependencias:
-
 ```bash
 bun install
-```
-
-3. Configura las variables de entorno:
-
-```bash
 cp .env.example .env
+# Edita .env con tus valores
+bun run dev
 ```
 
-4. Edita el archivo `.env` con tus valores.
+Las migraciones se aplican automáticamente al arrancar.
 
 ## Variables de Entorno
 
 ```env
-# Base de datos
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres"
+DATABASE_URL="file:./dev.db"
 
-# Better Auth
 BETTER_AUTH_URL="http://localhost:3000"
 BETTER_AUTH_SECRET="tu-secreto-seguro"
 
-# Google OAuth (opcional)
-GOOGLE_CLIENT_ID=""
-GOOGLE_CLIENT_SECRET=""
-
-# Usuario Admin (bootstrap)
 SEED_ADMIN_EMAIL="admin@example.com"
 SEED_ADMIN_NAME="Admin"
 SEED_ADMIN_PASSWORD="tu-password-seguro"
 ```
 
-## Ejecución
+## Integración con Komodo
 
-### Desarrollo
+### 1. Guardar credenciales de Komodo
 
-Levanta la base de datos con Docker:
-
-```bash
-docker compose up -d
-```
-
-Ejecuta las migraciones:
+Después de iniciar el servidor, guarda tus credenciales de Komodo (se almacenan en la BD):
 
 ```bash
-bunx drizzle-kit migrate
+curl -X POST http://localhost:3000/api/v0/deploy/credentials \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <tu-token>" \
+  -d '{
+    "name": "production",
+    "url": "https://tu-komodo.com",
+    "key": "tu-api-key",
+    "secret": "tu-api-secret"
+  }'
 ```
 
-Inicia el servidor de desarrollo:
+### 2. Trigger de deploy (GitHub Actions / Gitea)
+
+Envía una petición con el token de Better Auth y el stack a desplegar:
 
 ```bash
-bun run dev
+curl -X POST http://localhost:3000/api/v0/deploy/trigger \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <tu-token>" \
+  -d '{
+    "stack": "mi-stack",
+    "action": "build-pull-redeploy"
+  }'
 ```
 
-El servidor estará disponible en `http://localhost:3000`.
+**Acciones disponibles:**
 
-### Bootstrap Automático
+- `build` — Solo build de la imagen
+- `pull` — Solo pull de la imagen
+- `redeploy` — Solo redeploy del stack
+- `build-pull-redeploy` — Pipeline completo
 
-Al iniciar, el backend ejecuta automáticamente:
+### Workflow GitHub Actions
 
-1. **Creación de usuario admin**: Si `SEED_ADMIN_EMAIL` está definido y el usuario no existe, lo crea.
+```yaml
+name: Deploy to Komodo
 
-## Documentación de la API
+on:
+  release:
+    types: [published]
 
-Una vez el servidor esté corriendo:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deploy
+        run: |
+          curl -X POST ${{ secrets.BACKEND_URL }}/api/v0/deploy/trigger \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.BACKEND_TOKEN }}" \
+            -d '{
+              "stack": "${{ vars.KOMODO_STACK }}",
+              "action": "build-pull-redeploy"
+            }'
+```
+
+### Workflow Gitea Actions
+
+```yaml
+name: Deploy to Komodo
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deploy
+        run: |
+          curl -X POST ${{ secrets.BACKEND_URL }}/api/v0/deploy/trigger \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.BACKEND_TOKEN }}" \
+            -d '{
+              "stack": "${{ vars.KOMODO_STACK }}",
+              "action": "build-pull-redeploy"
+            }'
+```
+
+**Secrets necesarios en el repositorio:**
+
+- `BACKEND_URL` — URL de este backend (ej: `https://tu-backend.com`)
+- `BACKEND_TOKEN` — Token de sesión de Better Auth
+- `KOMODO_STACK` — Nombre del stack en Komodo
+
+## Endpoints de Deploy
+
+| Método   | Endpoint                            | Descripción                    |
+| -------- | ----------------------------------- | ------------------------------ |
+| `POST`   | `/api/v0/deploy/trigger`            | Disparar un deploy             |
+| `POST`   | `/api/v0/deploy/credentials`        | Guardar credenciales de Komodo |
+| `GET`    | `/api/v0/deploy/credentials-list`   | Listar credenciales            |
+| `DELETE` | `/api/v0/deploy/credentials-delete` | Eliminar credenciales          |
+
+## Endpoints de Auth (Better Auth)
+
+| Endpoint                  | Método | Descripción              |
+| ------------------------- | ------ | ------------------------ |
+| `/api/auth/sign-in/email` | POST   | Login con email/password |
+| `/api/auth/sign-up/email` | POST   | Registro                 |
+| `/api/auth/sign-out`      | POST   | Cerrar sesión            |
+| `/api/auth/session`       | GET    | Sesión actual            |
+
+## Documentación API
+
+Con el servidor corriendo:
 
 - **Scalar UI**: [http://localhost:3000/scalar](http://localhost:3000/scalar)
 - **OpenAPI JSON**: [http://localhost:3000/doc](http://localhost:3000/doc)
-
-## Autenticación
-
-El backend expone los endpoints de Better Auth en `/api/auth/*`:
-
-| Endpoint                   | Método | Descripción                 |
-| -------------------------- | ------ | --------------------------- |
-| `/api/auth/sign-up/email`  | POST   | Registro con email/password |
-| `/api/auth/sign-in/email`  | POST   | Login con email/password    |
-| `/api/auth/sign-in/social` | POST   | Login con OAuth (Google)    |
-| `/api/auth/sign-out`       | POST   | Cerrar sesión               |
-| `/api/auth/session`        | GET    | Obtener sesión actual       |
-
-## Base de Datos
-
-### Database Management (Drizzle)
-
-...
-
-## Scripts de Generación Automática
-
-Este proyecto incluye herramientas para acelerar el desarrollo generando boilerplate siguiendo las convenciones establecidas.
-
-### 1. Generar Endpoints Individuales
-
-Crea la estructura completa de un endpoint (schema, route, handler, index) y lo registra en la jerarquía de la API.
-
-```bash
-# Formato: VERSION_DEV="x.x.x" bun run <metodo> <ruta/recurso>
-VERSION_DEV="0.0.1" bun run get user/profile
-VERSION_DEV="1.0.0" bun run post products/create
-```
-
-_Soporta: `get`, `post`, `put`, `patch`, `delete`._
-
-### 2. Generar CRUD Completo
-
-Genera los 4 métodos básicos (`get`, `post`, `patch`, `delete`) para un recurso de una sola vez.
-
-```bash
-VERSION_DEV="0.0.1" bun run crud orders
-```
-
-### 3. Generar Tablas de Base de Datos
-
-Crea un nuevo archivo de tabla en `src/db/models/` y lo exporta automáticamente en `src/db/index.ts`.
-
-```bash
-
-bun run gen:table names_of_table
-
-```
-
-### 4. Generar Endpoint SSE (Server-Sent Events)
-
-Crea un endpoint configurado para streaming de eventos en tiempo real.
-
-```bash
-
-VERSION_DEV="0.0.1" bun run sse notifications/live
-
-```
-
----
-
-### Esquema
-
-El esquema incluye las tablas de Better Auth:
-
-- `user` - Usuarios
-- `session` - Sesiones activas
-- `account` - Cuentas vinculadas (OAuth, credentials)
-- `verification` - Tokens de verificación
-
-## Docker
-
-### Desarrollo con Docker Compose
-
-```bash
-# Levantar solo PostgreSQL
-docker compose up -d
-
-# Ver logs
-docker compose logs -f
-```
 
 ## Estructura del Proyecto
 
 ```
 src/
-├── api/                 # Rutas de la API
+├── api/
 │   ├── index.ts
-│   └── v0/              # Versionado de API
-├── core/                # Configuraciones del núcleo
-│   └── config.ts        # Conexión a DB
-├── db/                  # Base de datos
-│   ├── auth.ts          # Configuración Better Auth
+│   └── v0/
+│       └── deploy/
+│           ├── trigger/       # POST — trigger deploy
+│           ├── credentials/   # POST — guardar credenciales
+│           ├── credentials-list/   # GET — listar
+│           └── credentials-delete/ # DELETE — eliminar
+├── core/
+│   └── config.ts              # Conexión a SQLite
+├── db/
 │   ├── index.ts
-│   ├── models/          # Esquemas Drizzle
-│   │   └── auth-schema.ts
-│   └── relations.ts     # Relaciones entre tablas
-├── lib/                 # Utilidades
-│   ├── bootstrap.ts     # Inicialización automática
-│   └── seedAdmin.ts     # Script para crear admin
-└── index.ts             # Punto de entrada
+│   ├── models/
+│   │   ├── auth-schema.ts     # Tablas de Better Auth
+│   │   └── komodo.table.ts    # Tabla de credenciales Komodo
+│   └── relations.ts
+├── lib/
+│   ├── bootstrap.ts           # Migraciones + admin + komodo init
+│   └── logger.ts
+├── services/
+│   └── komodo.ts              # Cliente de Komodo
+└── index.ts
 ```
 
-## Scripts Disponibles
+## Scripts de Generación
 
-| Script                      | Descripción                       |
-| --------------------------- | --------------------------------- |
-| `bun run dev`               | Inicia el servidor con hot reload |
-| `bunx drizzle-kit generate` | Genera migraciones                |
-| `bunx drizzle-kit migrate`  | Ejecuta migraciones               |
-| `bunx drizzle-kit studio`   | Abre Drizzle Studio               |
+```bash
+# Endpoint individual
+bun run post resources/create
 
-## CI/CD
+# CRUD completo
+bun run crud resources
 
-El proyecto incluye GitHub Actions para:
+# Tabla de BD
+bun run gen:table nombre_tabla
 
-- Build automático de imagen Docker
-- Push a registry en cada merge a `main`
+# Endpoint SSE
+bun run sse events/live
+```
 
-Ver `.github/workflows/docker-build.yml` para configuración.
+## Desarrollo
+
+```bash
+bun run dev          # Servidor con hot reload
+bun drizzle-kit push # Aplicar esquema a la BD
+bun drizzle-kit studio # Abrir Drizzle Studio
+```

@@ -1,4 +1,5 @@
 import { KomodoClient, Types } from "komodo_client";
+import { eq } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import { db } from "@/core/config";
 import { komodoTable } from "@/db/models/komodo.table";
@@ -178,10 +179,25 @@ class KomodoService {
     }
   }
 
+  async listAllStacks() {
+    const client = this.ensureClient();
+    try {
+      const stacks = (await client.read(
+        "ListStacks",
+        {},
+      )) as Types.StackListItem[];
+      return stacks;
+    } catch (error) {
+      logger.error("❌ Failed to list stacks:", error);
+      throw error;
+    }
+  }
+
   async deleteCredentials(name: string) {
     try {
-      await db.delete(komodoTable).limit(1);
-
+      await db.delete(komodoTable).where(eq(komodoTable.name, name));
+      this.client = null;
+      this.activeCredentials = null;
       logger.info(`✅ Komodo credentials deleted for: ${name}`);
     } catch (error) {
       logger.error("❌ Failed to delete Komodo credentials:", error);

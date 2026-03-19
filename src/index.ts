@@ -9,7 +9,6 @@ import { logger } from "@/lib/logger";
 import { bootstrap } from "@/lib/bootstrap";
 import api from "@/api";
 import { authMiddleware } from "@/middleware";
-import { ErrorEndpoint } from "./core/endpoint";
 import { HTTPException } from "hono/http-exception";
 
 const app = new OpenAPIHono<{
@@ -22,12 +21,7 @@ const app = new OpenAPIHono<{
 app.onError((err, c) => {
   logger.error(`${err}`);
   const status = err instanceof HTTPException ? err.status : 500;
-  const errorResponse = new ErrorEndpoint(
-    status,
-    "INTERNAL_ERROR",
-    err.message,
-  );
-  return c.json(errorResponse.getData(), status);
+  return c.json({ error: err.message }, status);
 });
 
 app.use("*", cors());

@@ -1,81 +1,70 @@
-import {
-  pgTable,
-  text,
-  timestamp,
-  boolean,
-  index,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
-export const user = pgTable("user", {
-  id: varchar("id", { length: 512 }).primaryKey(),
-  name: varchar("name", { length: 512 }).notNull(),
-  email: varchar("email", { length: 512 }).notNull().unique(),
-  emailVerified: boolean("email_verified").default(false).notNull(),
-  image: varchar("image", { length: 512 }),
-  groups: text("groups"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
+export const user = sqliteTable("user", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: integer("email_verified", { mode: "boolean" })
+    .default(false)
     .notNull(),
+  image: text("image"),
+  groups: text("groups"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
 
-export const session = pgTable(
+export const session = sqliteTable(
   "session",
   {
-    id: varchar("id", { length: 512 }).primaryKey(),
-    expiresAt: timestamp("expires_at").notNull(),
+    id: text("id").primaryKey(),
+    expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
     token: text("token").notNull().unique(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .$onUpdate(() => new Date())
-      .notNull(),
-    ipAddress: varchar("ip_address", { length: 512 }),
-    userAgent: varchar("user_agent", { length: 512 }),
-    userId: varchar("user_id", { length: 512 })
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
   (table) => [index("session_userId_idx").on(table.userId)],
 );
 
-export const account = pgTable(
+export const account = sqliteTable(
   "account",
   {
-    id: varchar("id", { length: 512 }).primaryKey(),
-    accountId: varchar("account_id", { length: 512 }).notNull(),
-    providerId: varchar("provider_id", { length: 512 }).notNull(),
-    userId: varchar("user_id", { length: 512 })
+    id: text("id").primaryKey(),
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     accessToken: text("access_token"),
     refreshToken: text("refresh_token"),
     idToken: text("id_token"),
-    accessTokenExpiresAt: timestamp("access_token_expires_at"),
-    refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
-    scope: varchar("scope", { length: 512 }),
-    password: varchar("password", { length: 512 }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .$onUpdate(() => new Date())
-      .notNull(),
+    accessTokenExpiresAt: integer("access_token_expires_at", {
+      mode: "timestamp",
+    }),
+    refreshTokenExpiresAt: integer("refresh_token_expires_at", {
+      mode: "timestamp",
+    }),
+    scope: text("scope"),
+    password: text("password"),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   },
   (table) => [index("account_userId_idx").on(table.userId)],
 );
 
-export const verification = pgTable(
+export const verification = sqliteTable(
   "verification",
   {
-    id: varchar("id", { length: 512 }).primaryKey(),
-    identifier: varchar("identifier", { length: 512 }).notNull(),
+    id: text("id").primaryKey(),
+    identifier: text("identifier").notNull(),
     value: text("value").notNull(),
-    expiresAt: timestamp("expires_at").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .defaultNow()
-      .$onUpdate(() => new Date())
-      .notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );

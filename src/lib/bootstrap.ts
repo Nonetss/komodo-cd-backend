@@ -1,8 +1,9 @@
 // Script de inicialización del backend
-import { db } from "@/core/config";
+import { db, client } from "@/core/config";
 import { user } from "@/db/models/auth-schema";
 import { auth } from "@/core/auth";
 import { eq } from "drizzle-orm";
+import { migrate } from "drizzle-orm/libsql/migrator";
 
 /**
  * Crea el usuario admin si no existe
@@ -45,11 +46,26 @@ async function ensureAdminUser() {
 }
 
 /**
+ * Aplica las migraciones de la base de datos
+ */
+async function runMigrations() {
+  try {
+    console.log("📦 Aplicando migraciones...");
+    await migrate(db, { migrationsFolder: "./drizzle" });
+    console.log("✅ Migraciones aplicadas exitosamente");
+  } catch (error) {
+    console.error("❌ Error aplicando migraciones:", error);
+    throw error;
+  }
+}
+
+/**
  * Función principal de bootstrap que se ejecuta al iniciar el backend
  */
 export async function bootstrap() {
   console.log("🚀 Iniciando bootstrap...");
 
+  await runMigrations();
   await ensureAdminUser();
 
   console.log("✅ Bootstrap completado");

@@ -1,81 +1,81 @@
 # Komodo Backend
 
-> Parte de [Komodo CD](https://github.com/Nonetss/komodo-cd-backend). Frontend en [Nonetss/komodo-cd-frontend](https://github.com/Nonetss/komodo-cd-frontend).
+> Part of [Komodo CD](https://github.com/Nonetss/komodo-cd-backend). Frontend at [Nonetss/komodo-cd-frontend](https://github.com/Nonetss/komodo-cd-frontend).
 
-API REST para gestionar y disparar deploys sobre stacks de [Komodo](https://komo.do) desde GitHub Actions, Gitea Actions o cualquier cliente HTTP. Construida con **Hono** + **Bun**, autenticación con **Better Auth** y persistencia en **SQLite** via Drizzle ORM.
+REST API to manage and trigger deploys on [Komodo](https://komo.do) stacks from GitHub Actions, Gitea Actions, or any HTTP client. Built with **Hono** + **Bun**, authentication via **Better Auth**, and **SQLite** persistence through Drizzle ORM.
 
 ## Stack
 
-- **[Bun](https://bun.sh/)** — Runtime y gestor de paquetes
-- **[Hono](https://hono.dev/)** + [`@hono/zod-openapi`](https://github.com/honojs/middleware/tree/main/packages/zod-openapi) — Framework web con validación y OpenAPI
-- **[Better Auth](https://www.better-auth.com/)** — Autenticación: email/password y API Keys
-- **[Drizzle ORM](https://orm.drizzle.team/)** + **[libsql](https://github.com/tursodatabase/libsql)** — ORM tipado sobre SQLite
-- **[Komodo Client](https://komo.do)** — Cliente oficial para interactuar con la plataforma Komodo
-- **[Scalar](https://scalar.com/)** — Documentación interactiva OpenAPI
+- **[Bun](https://bun.sh/)** — Runtime and package manager
+- **[Hono](https://hono.dev/)** + [`@hono/zod-openapi`](https://github.com/honojs/middleware/tree/main/packages/zod-openapi) — Web framework with validation and OpenAPI
+- **[Better Auth](https://www.better-auth.com/)** — Authentication: email/password and API keys
+- **[Drizzle ORM](https://orm.drizzle.team/)** + **[libsql](https://github.com/tursodatabase/libsql)** — Type-safe ORM on top of SQLite
+- **[Komodo Client](https://komo.do)** — Official client to interact with the Komodo platform
+- **[Scalar](https://scalar.com/)** — Interactive OpenAPI docs
 
 ## Endpoints
 
-| Método   | Ruta                         | Auth             | Descripción                                      |
-| -------- | ---------------------------- | ---------------- | ------------------------------------------------ |
-| `POST`   | `/api/v0/deploy`             | API Key / sesión | Dispara una acción sobre un stack                |
-| `GET`    | `/api/v0/stacks`             | API Key / sesión | Lista los stacks con estado, servicios y commits |
-| `GET`    | `/api/v0/history`            | sesión           | Historial de acciones con usuario                |
-| `GET`    | `/api/v0/apikeys`            | sesión           | Lista las API Keys del usuario                   |
-| `POST`   | `/api/v0/apikeys`            | sesión           | Crea una nueva API Key                           |
-| `DELETE` | `/api/v0/apikeys`            | sesión           | Elimina una API Key                              |
-| `GET`    | `/api/v0/deploy/credentials` | sesión           | Lista las credenciales de Komodo                 |
-| `POST`   | `/api/v0/deploy/credentials` | sesión           | Guarda una credencial de Komodo                  |
-| `DELETE` | `/api/v0/deploy/credentials` | sesión           | Elimina una credencial de Komodo                 |
-| `GET`    | `/health-check`              | —                | Health check                                     |
-| `GET`    | `/scalar`                    | —                | Documentación interactiva                        |
-| `GET`    | `/doc`                       | —                | OpenAPI JSON                                     |
+| Method   | Route                        | Auth              | Description                                     |
+| -------- | ---------------------------- | ----------------- | ----------------------------------------------- |
+| `POST`   | `/api/v0/deploy`             | API key / session | Triggers an action on a stack                   |
+| `GET`    | `/api/v0/stacks`             | API key / session | Lists stacks with status, services, and commits |
+| `GET`    | `/api/v0/history`            | session           | Action history with user                        |
+| `GET`    | `/api/v0/apikeys`            | session           | Lists user API keys                             |
+| `POST`   | `/api/v0/apikeys`            | session           | Creates a new API key                           |
+| `DELETE` | `/api/v0/apikeys`            | session           | Deletes an API key                              |
+| `GET`    | `/api/v0/deploy/credentials` | session           | Lists Komodo credentials                        |
+| `POST`   | `/api/v0/deploy/credentials` | session           | Saves a Komodo credential                       |
+| `DELETE` | `/api/v0/deploy/credentials` | session           | Deletes a Komodo credential                     |
+| `GET`    | `/health-check`              | —                 | Health check                                    |
+| `GET`    | `/scalar`                    | —                 | Interactive docs                                |
+| `GET`    | `/doc`                       | —                 | OpenAPI JSON                                    |
 
-### Acciones de deploy
+### Deploy actions
 
-| Acción          | Descripción                              |
+| Action          | Description                              |
 | --------------- | ---------------------------------------- |
-| `pull`          | Pull de la imagen sin reiniciar el stack |
-| `redeploy`      | Detiene y vuelve a levantar el stack     |
-| `pull-redeploy` | Pull de imagen + redeploy completo       |
+| `pull`          | Pulls image without restarting the stack |
+| `redeploy`      | Stops and starts the stack again         |
+| `pull-redeploy` | Pulls image + full redeploy              |
 
-## Desarrollo
+## Development
 
 ```bash
 bun install
 cp .env.example .env
-# Editar .env con tus valores
+# Edit .env with your values
 bun dev
 ```
 
-El servidor arranca en `http://localhost:3000`.
-Las migraciones y el usuario admin se aplican automáticamente al iniciar.
+Server starts at `http://localhost:3000`.
+Migrations and the admin user are applied automatically on startup.
 
-Si cambias el schema de la BD, genera una nueva migración:
+If you change the DB schema, generate a new migration:
 
 ```bash
 bunx drizzle-kit generate
 ```
 
-## Variables de entorno
+## Environment variables
 
-| Variable              | Requerida | Descripción                                                        |
-| --------------------- | --------- | ------------------------------------------------------------------ |
-| `DATABASE_URL`        | ✅        | Ruta SQLite. Dev: `file:./dev.db` · Docker: `file:/data/db.sqlite` |
-| `BETTER_AUTH_SECRET`  | ✅        | Secreto para firmar sesiones. `openssl rand -base64 32`            |
-| `BETTER_AUTH_URL`     | ✅        | URL pública del frontend. Para CORS y trusted origins              |
-| `SEED_ADMIN_EMAIL`    | —         | Email del admin que se crea al arrancar si no existe               |
-| `SEED_ADMIN_NAME`     | —         | Nombre del admin inicial                                           |
-| `SEED_ADMIN_PASSWORD` | —         | Contraseña del admin inicial                                       |
+| Variable              | Required | Description                                                        |
+| --------------------- | -------- | ------------------------------------------------------------------ |
+| `DATABASE_URL`        | ✅       | SQLite path. Dev: `file:./dev.db` · Docker: `file:/data/db.sqlite` |
+| `BETTER_AUTH_SECRET`  | ✅       | Secret used to sign sessions. `openssl rand -base64 32`            |
+| `BETTER_AUTH_URL`     | ✅       | Public frontend URL. Used for CORS and trusted origins             |
+| `SEED_ADMIN_EMAIL`    | —        | Admin email created on startup if missing                          |
+| `SEED_ADMIN_NAME`     | —        | Initial admin name                                                 |
+| `SEED_ADMIN_PASSWORD` | —        | Initial admin password                                             |
 
-## Uso desde CI/CD
+## CI/CD usage
 
-La autenticación se hace con una API Key pasada en el header `x-api-key`. Las keys se generan desde el dashboard del frontend.
+Authentication uses an API key passed in the `x-api-key` header. Keys are generated from the frontend dashboard.
 
 ```bash
 curl -X POST https://app.example.com/api/v0/deploy \
-  -H "x-api-key: <tu-api-key>" \
+  -H "x-api-key: <your-api-key>" \
   -H "Content-Type: application/json" \
-  -d '{"stack":"mi-stack","action":"pull-redeploy"}'
+  -d '{"stack":"my-stack","action":"pull-redeploy"}'
 ```
 
 ### GitHub Actions
@@ -89,14 +89,14 @@ curl -X POST https://app.example.com/api/v0/deploy \
       -d '{"stack":"${{ vars.STACK_NAME }}","action":"pull-redeploy"}'
 ```
 
-**Secrets necesarios:**
+**Required secrets:**
 
-- `APP_URL` — URL pública de la app (ej: `https://app.example.com`)
-- `KOMODO_API_KEY` — API Key generada desde el dashboard
+- `APP_URL` — Public app URL (example: `https://app.example.com`)
+- `KOMODO_API_KEY` — API key generated from the dashboard
 
 ## Docker
 
-La imagen expone el puerto `3000` y espera un volumen en `/data` para la BD SQLite.
+The image exposes port `3000` and expects a volume at `/data` for the SQLite DB.
 
 ```bash
 docker build -t komodo-backend .
@@ -104,41 +104,41 @@ docker build -t komodo-backend .
 docker run -d \
   -p 3000:3000 \
   -v komodo_data:/data \
-  -e BETTER_AUTH_SECRET=<secreto> \
+  -e BETTER_AUTH_SECRET=<secret> \
   -e BETTER_AUTH_URL=https://app.example.com \
   -e SEED_ADMIN_EMAIL=admin@example.com \
   -e SEED_ADMIN_PASSWORD=<password> \
   komodo-backend
 ```
 
-O con el `docker-compose.yml` del repositorio raíz (recomendado):
+Or with the root repository `docker-compose.yml` (recommended):
 
 ```bash
 cp ../.env.example ../.env
-# Editar ../.env
+# Edit ../.env
 docker compose -f ../docker-compose.yml up -d --build
 ```
 
-## Estructura
+## Structure
 
 ```
 src/
 ├── api/v0/
 │   ├── deploy/
-│   │   ├── trigger/          # POST /deploy — dispara acciones
-│   │   └── credentials/      # CRUD credenciales de Komodo
-│   ├── stacks/               # GET /stacks — estado de los stacks
-│   ├── history/              # GET /history — historial de acciones
-│   └── apikeys/              # CRUD API Keys
+│   │   ├── trigger/          # POST /deploy — triggers actions
+│   │   └── credentials/      # Komodo credentials CRUD
+│   ├── stacks/               # GET /stacks — stack status
+│   ├── history/              # GET /history — action history
+│   └── apikeys/              # API keys CRUD
 ├── core/
-│   ├── auth.ts               # Configuración de Better Auth
-│   └── config.ts             # Cliente de BD (Drizzle + libsql)
-├── db/models/                # Schemas de Drizzle
+│   ├── auth.ts               # Better Auth configuration
+│   └── config.ts             # DB client (Drizzle + libsql)
+├── db/models/                # Drizzle schemas
 ├── lib/
-│   ├── bootstrap.ts          # Migraciones + seed admin al arrancar
+│   ├── bootstrap.ts          # Migrations + admin seed on startup
 │   └── logger.ts
-├── middleware.ts              # Auth: sesión por cookie y API Key
+├── middleware.ts             # Auth: cookie session and API key
 └── services/
-    └── komodo.ts             # Cliente de Komodo (PullStack, DeployStack)
-drizzle/                      # Migraciones SQL generadas
+    └── komodo.ts             # Komodo client (PullStack, DeployStack)
+drizzle/                      # Generated SQL migrations
 ```

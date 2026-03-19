@@ -2,7 +2,9 @@ import { z } from "@hono/zod-openapi";
 
 export const TriggerBodySchema = z.object({
   stack: z.string().openapi({ example: "mi-stack" }),
-  action: z.enum(["pull", "redeploy"]).openapi({ example: "redeploy" }),
+  action: z
+    .enum(["pull", "redeploy", "pull-redeploy"])
+    .openapi({ example: "redeploy" }),
 });
 
 export const TriggerSchema = z.object({

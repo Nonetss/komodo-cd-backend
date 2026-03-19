@@ -1,7 +1,8 @@
-import v0 from "@/api/v0";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import deployRoute from "@/api/v0/deploy";
 
 const app = new OpenAPIHono();
-app.route("/api", v0);
+
+app.route("/v0", deployRoute);
 
 export default app;

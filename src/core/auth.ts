@@ -12,7 +12,7 @@ import {
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "pg",
+    provider: "sqlite",
     schema: {
       user: userTable,
       session: session,
@@ -32,8 +32,20 @@ export const auth = betterAuth({
   user: {
     additionalFields: {
       groups: {
-        type: "string[]",
+        type: "string",
         required: true,
+        input: false,
+        transform: {
+          input: (val: string | string[]) =>
+            Array.isArray(val) ? JSON.stringify(val) : val,
+          output: (val: string) => {
+            try {
+              return JSON.parse(val);
+            } catch {
+              return [];
+            }
+          },
+        },
       },
     },
   },

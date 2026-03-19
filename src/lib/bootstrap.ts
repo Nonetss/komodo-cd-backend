@@ -4,6 +4,7 @@ import { user } from "@/db/models/auth-schema";
 import { auth } from "@/core/auth";
 import { eq } from "drizzle-orm";
 import { migrate } from "drizzle-orm/libsql/migrator";
+import { komodoService } from "@/services/komodo";
 
 /**
  * Crea el usuario admin si no existe
@@ -67,6 +68,7 @@ export async function bootstrap() {
 
   await runMigrations();
   await ensureAdminUser();
+  await komodoService.initialize();
 
   console.log("✅ Bootstrap completado");
 }

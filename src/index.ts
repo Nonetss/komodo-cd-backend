@@ -32,7 +32,15 @@ app.onError((err, c) => {
   return c.json({ error: err.message }, status);
 });
 
-app.use("*", cors());
+app.use(
+  "*",
+  cors({
+    origin: (origin) => origin || "*",
+    credentials: true,
+    allowHeaders: ["Content-Type", "Authorization", "x-api-key"],
+    allowMethods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  }),
+);
 app.use("*", honoLogger());
 app.use("/api/v0/*", authMiddleware);
 

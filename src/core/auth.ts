@@ -13,6 +13,11 @@ import {
 } from "@/db/models/auth-schema";
 
 export const auth = betterAuth({
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL || "http://localhost:4321",
+    "http://localhost:3000",
+    "http://localhost:4321",
+  ],
   database: drizzleAdapter(db, {
     provider: "sqlite",
     schema: {

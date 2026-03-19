@@ -12,7 +12,9 @@ export const authMiddleware = async (c: Context, next: Next) => {
     if (!result?.valid || !result?.key) {
       return c.json({ error: "Unauthorized" }, 401);
     }
-    c.set("user", { id: result.key.userId } as User);
+    const userId = result.key.userId ?? result.key.referenceId ?? "api-key";
+    const keyName = result.key.name ? `API Key: ${result.key.name}` : "API Key";
+    c.set("user", { id: userId, name: keyName } as User);
     c.set("session", null);
     await next();
     return;

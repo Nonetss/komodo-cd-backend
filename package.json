@@ -13,6 +13,7 @@
     "sse": "bun run scripts/generate-sse.ts"
   },
   "dependencies": {
+    "@better-auth/api-key": "^1.5.5",
     "@hono/zod-openapi": "^1.1.3",
     "@libsql/client": "^0.17.0",
     "@scalar/hono-api-reference": "^0.9.22",

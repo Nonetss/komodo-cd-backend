@@ -20,14 +20,11 @@ export const listApiKeysHandler = async (c: Context) => {
       id: k.id,
       name: k.name ?? null,
       start: k.start ?? null,
-      createdAt: k.createdAt ? new Date(k.createdAt).toISOString() : null,
+      createdAt: k.createdAt
+        ? new Date(k.createdAt).toISOString()
+        : new Date().toISOString(),
       expiresAt: k.expiresAt ? new Date(k.expiresAt).toISOString() : null,
     }));
-
-    // `createdAt` en frontend es string requerido: garantizamos no-null.
-    keys.forEach((k: any) => {
-      if (!k.createdAt) k.createdAt = new Date().toISOString();
-    });
     return c.json({ success: true, keys });
   } catch (error: any) {
     logger.error(

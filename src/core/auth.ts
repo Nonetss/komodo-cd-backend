@@ -25,5 +25,8 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  rateLimit: {
+    enabled: false,
+  },
   plugins: [apiKey()],
 });

@@ -12,6 +12,7 @@ import {
 
 export const auth = betterAuth({
   trustedOrigins: [process.env.BETTER_AUTH_URL!],
+  trustedProxies: ["127.0.0.1", "::1", "172.16.0.0/12", "10.0.0.0/8"],
   database: drizzleAdapter(db, {
     provider: "sqlite",
     schema: {

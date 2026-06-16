@@ -1,14 +1,14 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import {
-  listApiKeysRoute,
-  createApiKeyRoute,
-  deleteApiKeyRoute,
-} from "./apikeys.route";
-import {
-  listApiKeysHandler,
-  createApiKeyHandler,
-  deleteApiKeyHandler,
+	createApiKeyHandler,
+	deleteApiKeyHandler,
+	listApiKeysHandler,
 } from "./apikeys.handler";
+import {
+	createApiKeyRoute,
+	deleteApiKeyRoute,
+	listApiKeysRoute,
+} from "./apikeys.route";
 
 const router = new OpenAPIHono();
 

@@ -1,6 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { stacksRoute } from "./stacks.route";
 import { stacksHandler } from "./stacks.handler";
+import { stacksRoute } from "./stacks.route";
 
 const router = new OpenAPIHono();
 

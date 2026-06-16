@@ -1,6 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { historyRoute } from "./history.route";
 import { historyHandler } from "./history.handler";
+import { historyRoute } from "./history.route";
 
 const router = new OpenAPIHono();
 

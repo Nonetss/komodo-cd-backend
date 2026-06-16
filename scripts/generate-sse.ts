@@ -1,4 +1,4 @@
-import { mkdirSync, existsSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import path from "node:path";
 
 const version = Bun.env.VERSION_DEV || "0.0.0";
@@ -8,8 +8,8 @@ const apiVersion = `v${major}`;
 const fullEndpointPath = Bun.argv[2];
 
 if (!fullEndpointPath) {
-  console.error("Usage: VERSION_DEV=0.0.1 bun run sse <path>");
-  process.exit(1);
+	console.error("Usage: VERSION_DEV=0.0.1 bun run sse <path>");
+	process.exit(1);
 }
 
 const parts = fullEndpointPath.split("/");
@@ -17,17 +17,17 @@ const action = parts.pop()!;
 const resourcePath = parts.join("/");
 
 const targetDir = path.join(
-  process.cwd(),
-  "src",
-  "api",
-  apiVersion,
-  resourcePath,
-  action,
+	process.cwd(),
+	"src",
+	"api",
+	apiVersion,
+	resourcePath,
+	action,
 );
 
 if (existsSync(targetDir)) {
-  console.error(`Directory ${targetDir} already exists.`);
-  process.exit(1);
+	console.error(`Directory ${targetDir} already exists.`);
+	process.exit(1);
 }
 
 mkdirSync(targetDir, { recursive: true });
@@ -94,45 +94,45 @@ export default router;
 `;
 
 await Promise.all([
-  Bun.write(path.join(targetDir, `${action}.schema.ts`), schemaContent),
-  Bun.write(path.join(targetDir, `${action}.route.ts`), routeContent),
-  Bun.write(path.join(targetDir, `${action}.handler.ts`), handlerContent),
-  Bun.write(path.join(targetDir, `${action}.index.ts`), indexContent),
+	Bun.write(path.join(targetDir, `${action}.schema.ts`), schemaContent),
+	Bun.write(path.join(targetDir, `${action}.route.ts`), routeContent),
+	Bun.write(path.join(targetDir, `${action}.handler.ts`), handlerContent),
+	Bun.write(path.join(targetDir, `${action}.index.ts`), indexContent),
 ]);
 
 // --- 2. GESTIÓN RECURSIVA DE INDEX.TS ---
 
 async function updateOrCreateIndex(
-  dirPath: string,
-  subImportName: string,
-  subImportPath: string,
+	dirPath: string,
+	subImportName: string,
+	subImportPath: string,
 ) {
-  const folderName = path.basename(dirPath);
-  const routePrefix = folderName === "api" ? "api" : folderName;
-  const indexPath = path.join(dirPath, "index.ts");
-  let content = "";
+	const folderName = path.basename(dirPath);
+	const routePrefix = folderName === "api" ? "api" : folderName;
+	const indexPath = path.join(dirPath, "index.ts");
+	let content = "";
 
-  if (existsSync(indexPath)) {
-    content = await Bun.file(indexPath).text();
-    if (content.includes(subImportPath)) return;
+	if (existsSync(indexPath)) {
+		content = await Bun.file(indexPath).text();
+		if (content.includes(subImportPath)) return;
 
-    const importLine = `import ${subImportName} from "${subImportPath}";\n`;
-    content = importLine + content;
+		const importLine = `import ${subImportName} from "${subImportPath}";\n`;
+		content = importLine + content;
 
-    const routeLine = `app.route("/${routePrefix}", ${subImportName});\n`;
-    if (content.includes("const app = new OpenAPIHono();")) {
-      content = content.replace(
-        "const app = new OpenAPIHono();",
-        `const app = new OpenAPIHono();\n${routeLine}`,
-      );
-    } else {
-      content = content.replace(
-        "export default",
-        `${routeLine}\nexport default`,
-      );
-    }
-  } else {
-    content = `import { OpenAPIHono } from "@hono/zod-openapi";
+		const routeLine = `app.route("/${routePrefix}", ${subImportName});\n`;
+		if (content.includes("const app = new OpenAPIHono();")) {
+			content = content.replace(
+				"const app = new OpenAPIHono();",
+				`const app = new OpenAPIHono();\n${routeLine}`,
+			);
+		} else {
+			content = content.replace(
+				"export default",
+				`${routeLine}\nexport default`,
+			);
+		}
+	} else {
+		content = `import { OpenAPIHono } from "@hono/zod-openapi";
 import ${subImportName} from "${subImportPath}";
 
 const app = new OpenAPIHono();
@@ -141,40 +141,40 @@ app.route("/${routePrefix}", ${subImportName});
 
 export default app;
 `;
-  }
-  await Bun.write(indexPath, content);
+	}
+	await Bun.write(indexPath, content);
 }
 
 const immediateParentDir = path.join(
-  process.cwd(),
-  "src",
-  "api",
-  apiVersion,
-  resourcePath,
+	process.cwd(),
+	"src",
+	"api",
+	apiVersion,
+	resourcePath,
 );
 await updateOrCreateIndex(
-  immediateParentDir,
-  `${action}Route`,
-  `@/api/${apiVersion}/${resourcePath}/${action}/${action}.index`,
+	immediateParentDir,
+	`${action}Route`,
+	`@/api/${apiVersion}/${resourcePath}/${action}/${action}.index`,
 );
 
 let currentPath = immediateParentDir;
 const apiRootDir = path.join(process.cwd(), "src", "api");
 
 while (true) {
-  const parentDir = path.dirname(currentPath);
-  const currentFolder = path.basename(currentPath);
-  const relPath = path.relative(path.join(process.cwd(), "src"), currentPath);
-  const importAlias = ("@/" + relPath + "/index").replace("/index", "");
+	const parentDir = path.dirname(currentPath);
+	const currentFolder = path.basename(currentPath);
+	const relPath = path.relative(path.join(process.cwd(), "src"), currentPath);
+	const importAlias = ("@/" + relPath + "/index").replace("/index", "");
 
-  let importName =
-    currentFolder === apiVersion ? apiVersion : `${currentFolder}Route`;
-  await updateOrCreateIndex(parentDir, importName, importAlias);
+	let importName =
+		currentFolder === apiVersion ? apiVersion : `${currentFolder}Route`;
+	await updateOrCreateIndex(parentDir, importName, importAlias);
 
-  if (parentDir === apiRootDir) break;
-  currentPath = parentDir;
+	if (parentDir === apiRootDir) break;
+	currentPath = parentDir;
 }
 
 console.log(
-  `Successfully created and registered SSE endpoint: ${apiVersion}/${fullEndpointPath}`,
+	`Successfully created and registered SSE endpoint: ${apiVersion}/${fullEndpointPath}`,
 );

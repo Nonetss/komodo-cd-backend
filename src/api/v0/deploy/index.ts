@@ -1,6 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import triggerRoute from "@/api/v0/deploy/trigger/trigger.index";
 import credentialsRoute from "@/api/v0/deploy/credentials/index";
+import triggerRoute from "@/api/v0/deploy/trigger/trigger.index";
 
 const app = new OpenAPIHono();
 

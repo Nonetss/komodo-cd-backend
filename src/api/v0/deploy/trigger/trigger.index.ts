@@ -1,6 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
-import { triggerRoute } from "./trigger.route";
 import { triggerHandler } from "./trigger.handler";
+import { triggerRoute } from "./trigger.route";
 
 const router = new OpenAPIHono();
 
